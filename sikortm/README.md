@@ -1,0 +1,1 @@
+# To jest plik README.md użytkownika Jakub Sikora
