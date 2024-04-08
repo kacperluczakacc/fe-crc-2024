@@ -1,9 +1,13 @@
+function lowerLetters(text: string) {
+  return text.toLowerCase()
+}
+
 
 function App() {
 
   return (
     <>
-      <h1>Hello World!</h1>
+      <h1>{lowerLetters("Hello World!")}</h1>
     </>
   )
 }
