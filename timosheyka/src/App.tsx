@@ -1,5 +1,7 @@
 import { useState } from "react";
 import Task from "./components/Task";
+import TaskList from "./components/TaskList";
+import AddTask from "./components/AddTask";
 
 export type TaskType = {
   title: string,
@@ -28,27 +30,12 @@ const mockTasks: TaskType[] = [
 const App = () => {
   const [tasks, setTasks] = useState(mockTasks);
 
-  function handleAddTask() {
-    setTasks(prevTasks => [...prevTasks, {
-      title: "Task 4",
-      author: "Nathan",
-      deadline: "19/09/2024"
-    }])
-  }
-
   return (
     <main className="p-4">
       <section className="flex flex-col gap-8">
         <h1 className="text-4xl font-bold">My Tasks</h1>
-        <button onClick={handleAddTask} type="button" className="border border-solid">ADD TASK</button>
-        {tasks.map(task => 
-          <Task
-            key={task.title.replace(/ /g, '-')}
-            title={task.title}
-            author={task.author}
-            deadline={task.deadline}
-          />)
-        }
+        <AddTask setTasks={setTasks}/>
+        <TaskList tasks={tasks}/>
       </section>
     </main>
   );
