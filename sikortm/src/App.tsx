@@ -3,9 +3,10 @@
 // Argumenty przekazywane do komponentów Reactowych nazywamy PROPS
 
 import { useState } from "react";
-import Task from "./components/Task.tsx";
-import TaskList from "./components/TaskList.tsx";
-import AddTask from "./components/AddTask.tsx";
+import { AddTask, TaskList } from "./pages";
+import { Route, Switch } from "react-router-dom";
+import { ROUTE } from "./lib/constans.ts";
+import { Header, Task } from "./components";
 
 export type Task = {
   title: string;
@@ -39,13 +40,17 @@ const App = () => {
   const [tasks, setTasks] = useState(mockTasks);
 
   return (
-    <main className="p-4">
-      <section className="flex flex-col gap-8">
-        <h1 className="text-4xl font-bold">My tasks</h1>
-        <AddTask setTasks={setTasks} />
-        <TaskList tasks={tasks} />
-      </section>
-    </main>
+   <>
+    <Header/>
+    <Switch>
+      <Route path={ROUTE.ADD_TASK}>
+        <AddTask setTasks={setTasks}/>
+      </Route>
+      <Route path={ROUTE.HOME}>
+        <TaskList tasks={tasks}/>
+      </Route>
+    </Switch>
+   </> 
   )
 }
 
