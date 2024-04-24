@@ -1,30 +1,43 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import Task from './components/Task'
+import TaskList from './components/TaskList'
+import AddTask from './components/AddTask'
 
-function App() {
-	const [count, setCount] = useState(0)
+export type Task = {
+	title: string
+	author: string
+	deadline: string
+}
+
+const mockTasks: Task[] = [
+	{
+		title: 'Task 1',
+		author: 'Dawid',
+		deadline: '18/09/2025',
+	},
+	{
+		title: 'Task 2',
+		author: 'Kacper',
+		deadline: '18/05/2025',
+	},
+	{
+		title: 'Task 3',
+		author: 'Łucja',
+		deadline: '18/01/2025',
+	},
+]
+
+const App = () => {
+	const [tasks, setTasks] = useState(mockTasks)
 
 	return (
-		<>
-			<div>
-				<a href='https://vitejs.dev' target='_blank'>
-					<img src={viteLogo} className='logo' alt='Vite logo' />
-				</a>
-				<a href='https://react.dev' target='_blank'>
-					<img src={reactLogo} className='logo react' alt='React logo' />
-				</a>
-			</div>
-			<h1>Vite + React</h1>
-			<div className='card'>
-				<button onClick={() => setCount(count => count + 1)}>count is {count}</button>
-				<p>
-					Edit <code>src/App.tsx</code> and save to test HMR
-				</p>
-			</div>
-			<p className='read-the-docs'>Click on the Vite and React logos to learn more</p>
-		</>
+		<main className='p-4 text-blue'>
+			<section className='flex flex-col gap-8'>
+				<h1 className='text-4xl font-bold'>My Tasks</h1>
+				<AddTask setTasks={setTasks} />
+				<TaskList tasks={tasks} />
+			</section>
+		</main>
 	)
 }
 
