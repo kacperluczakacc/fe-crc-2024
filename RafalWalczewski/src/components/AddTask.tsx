@@ -14,7 +14,11 @@ export default function AddTask({ setTasks }: AddTasksProps) {
   // const [taskName, setTaskName] = useState("");
 
   function handleAddTask() {
-    if (taskNameRef.current)
+    if (
+      taskNameRef.current &&
+      taskAuthorRef.current &&
+      taskDeadlineRef.current
+    ) {
       setTasks((prevTasks) => [
         ...prevTasks,
         {
@@ -23,6 +27,7 @@ export default function AddTask({ setTasks }: AddTasksProps) {
           deadline: taskDeadlineRef.current!.value,
         },
       ]);
+    }
   }
 
   return (
@@ -38,7 +43,7 @@ export default function AddTask({ setTasks }: AddTasksProps) {
         <label>Task name:</label>
         <input
           ref={taskNameRef}
-          onInput={(inputValue) => setTaskName(inputValue)}
+          // onInput={(inputValue) => setTaskName(inputValue.currentTarget.value)}
           className="border"
           type="text"
         ></input>

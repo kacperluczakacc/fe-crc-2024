@@ -1,10 +1,11 @@
+// Komponenty w React.js są funkcjami, które zwracają JEDEN element DOM.
+// Składnią React.js jest JSX.
+// Argumenty przekazywane do komponentów Reactowych nazywamy PROPS
+
 import { useState } from "react";
 import Task from "./components/Task";
 import TaskList from "./components/TaskList";
-
-type AppProps = {
-  text: string;
-};
+import AddTask from "./components/AddTask";
 
 export type Task = {
   title: string;
@@ -12,47 +13,37 @@ export type Task = {
   deadline: string;
 };
 
+// "Coming from server"
 const mockTasks: Task[] = [
   {
     title: "Task 1",
-    author: "Rafal",
-    deadline: "18/09/2024",
+    author: "Kacper",
+    deadline: "18/09/2025",
   },
   {
     title: "Task 2",
-    author: "Gosia",
-    deadline: "18/10/2025",
+    author: "Tomek",
+    deadline: "18/09/2024",
   },
   {
     title: "Task 3",
-    author: "Tomek",
-    deadline: "18/01/2024",
+    author: "Gosia",
+    deadline: "18/01/2025",
   },
 ];
 
-//Hooks to wbudowane funkcje, które pozwalają w prosty sposób manipulować róznymi elementami
+// Hooks to wbudowane funkcje/narzędzia, które pozwalają nam w prosty sposób manipulować
+// różnymi elementami/cyklami komponentów w React.js
 
 const App = () => {
   const [tasks, setTasks] = useState(mockTasks);
 
-  function handleAddTask(){
-    setTasks(prevTasks =>[...prevTasks, {
-      title: 'Task 4',
-      author: 'Natalia',
-      deadline: '19/09/2024'
-    }])
-  }
-
   return (
     <main className="p-4">
       <section className="flex flex-col gap-8">
-        <div>
-          <h1 className="text-4xl font-bold text-center">My Tasks</h1>
-          <button onClick={handleAddTask} type="button" className = "border border-solid mx-auto">ADD TASK</button>
-          {tasks.map((task) =>
-            <TaskList tasks={tasks}/>
-          )}
-        </div>
+        <h1 className="text-4xl font-bold">My tasks</h1>
+        <AddTask setTasks={setTasks} />
+        <TaskList tasks={tasks} />
       </section>
     </main>
   );
