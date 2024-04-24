@@ -1,6 +1,8 @@
 import { useState } from "react"
-import TaskList from "./components/TaskList"
-import AddNewTask from "./components/AddNewTask"
+import { TaskList, AddNewTask } from './pages'
+import { Route, Switch } from "react-router-dom"
+import { ROUTE } from "./lib/constants"
+import Header from "./components/Header"
 
 export type TaskT = {
   title: string,
@@ -28,17 +30,19 @@ const mockTasks: TaskT[] = [
 
 function App() {
 
-  const [tasks, setTasks] = useState(mockTasks) 
+  const [tasks, setTasks] = useState(mockTasks)
 
   return (
     <>
-      <main className="p-4">
-        <section className="flex flex-col gap-8">
-          <h1 className="text-4xl font-bold">My tasks</h1>
-          <AddNewTask setTasks={setTasks}/>
+      <Header />
+      <Switch>
+        <Route path={ROUTE.ADD_TASKS}>
+          <AddNewTask setTasks={setTasks} />
+        </Route>
+        <Route path={ROUTE.HOME}>
           <TaskList tasks={tasks} />
-        </section>
-      </main>
+        </Route>
+      </Switch>
     </>
   )
 }
