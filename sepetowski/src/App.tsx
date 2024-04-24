@@ -1,21 +1,48 @@
 import { useState } from 'react';
+import { AddTask, Home } from './pages';
+import { Route, Switch } from 'react-router-dom';
+import { ROUTE } from './lib/routes';
 import { Task } from './types/types';
-import { tasks as defaultTasks } from './data/tasks';
-import { TasksContainer } from './components/tasks/TasksContainer';
+import { Header } from './components/Header';
 
-export const App = () => {
-	const [tasks, setTasks] = useState<Task[]>(defaultTasks);
+const mockTasks: Task[] = [
+	{
+		title: 'Task 1',
+		author: 'xyz',
+		deadline: '18/09/2025',
+	},
+	{
+		title: 'Task 2',
+		author: 'xyz',
+		deadline: '18/09/2024',
+	},
+	{
+		title: 'Task 3',
+		author: 'xyz',
+		deadline: '18/01/2025',
+	},
+];
 
-	const addNewTaskHandler = (task: Task) => {
+const App = () => {
+	const [tasks, setTasks] = useState<Task[]>(mockTasks);
+
+	const addTaskHandler = (task: Task) => {
 		setTasks((prev) => [...prev, task]);
 	};
 
 	return (
-		<main className='container mx-auto p-6'>
-			<section className='text-center'>
-				<h1 className='text-5xl'>My tasks</h1>
-			</section>
-			<TasksContainer tasks={tasks} onAddNewTaskHandler={addNewTaskHandler} />
-		</main>
+		<>
+			<Header />
+			<Switch>
+				<Route path={ROUTE.ADD_TASK}>
+					<AddTask onAddTask={addTaskHandler} />
+				</Route>
+				<Route path={ROUTE.HOME}>
+					<Home tasks={tasks} />
+				</Route>
+			</Switch>
+		</>
 	);
 };
+
+export default App;
