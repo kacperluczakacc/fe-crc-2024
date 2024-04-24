@@ -1,8 +1,8 @@
 import { useRef } from "react";
-import { TaskType } from "../App";
+import { Task } from "../App";
 
 type AddTaskProps = {
-    setTasks: React.Dispatch<React.SetStateAction<TaskType[]>>
+    setTasks: React.Dispatch<React.SetStateAction<Task[]>>
 }
 
 export default function AddTask({ setTasks }: AddTaskProps) {
@@ -27,17 +27,17 @@ export default function AddTask({ setTasks }: AddTaskProps) {
             <button 
                 onClick={handleAddTask} 
                 type="button" 
-                className="border border-solid"
-            >
-            ADD TASK</button>
+                className="border border-solid">
+                ADD TASK
+            </button>
             <form className="flex flex-col gap-1 my-2">
                 <label>Task name:</label>
                 <input ref={taskNameRef} // onChange={(inputVal) => setTaskName(inputVal.currentTarget.value)}
-                className="border" type="text"></input>
+                    className="border" type="text" />
                 <label>Author</label>
-                <input ref={authorRef} className="border" type="text"></input>
-                <label>Deadline</label>
-                <input ref={deadlineRef} className="border" type="text"></input>
+                <input ref={authorRef} className="border" type="text" />
+                <label>Deadline:</label>
+                <input ref={deadlineRef} className="border" type="text" />
             </form>
         </div>
     )
