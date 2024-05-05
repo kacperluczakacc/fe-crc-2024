@@ -2,6 +2,9 @@ import { useState } from 'react'
 import { Task } from './components/task'
 import { TaskList } from './components/taskList'
 import { AddTaskForm } from './components/addTaskForm'
+import { Route,Switch } from 'react-router-dom'
+import { ROUTE } from '/lib/constants'
+import { Header } from './components/Header'
 
 export type Task = {
   title : string,
@@ -35,14 +38,20 @@ const App = () => {
 
   return (
     <>
-    <div className='bg-slate-700 text-slate-200 h-screen'>
-      <div className='text-4xl text-slate-100'>My App</div>
+
+    <div className='bg-white h-screen'>
+      <Header />
       <div className='flex flex-col gap-5'>
-        <h1 className='text-2xl'>Tasks</h1>
-        <div className='flex justify-center m-2'>
+        <h1 className='text-2xl'>Hi, got a new thing to add?</h1>
+        <Switch>
+        <Route path={ROUTE.ADD_TASK}>
           <AddTaskForm setTasks={setTasks} />
-        </div>
-        <TaskList tasks={tasks} />
+        </Route>
+
+        <Route path={ROUTE.HOME}>
+          <TaskList tasks={tasks} />
+        </Route>
+        </Switch>
         
       </div>
     </div>
