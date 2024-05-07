@@ -1,40 +1,47 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Task } from './components/task'
 import { TaskList } from './components/taskList'
 import { AddTaskForm } from './components/addTaskForm'
-import { Route,Switch } from 'react-router-dom'
+import { Route,Switch} from 'react-router-dom'
 import { ROUTE } from '/lib/constants'
 import { Header } from './components/Header'
+import { getTasks } from './helpers/requests'
 
 export type Task = {
   title : string,
   author : string,
   deadline: string
 }
+// const mockTasks: Task[] = [
+//   {
+//     title : 'Task 1',
+//     author : 'Author 1',
+//     deadline: "10.05.2025"
+//   },
+//   {
+//     title : 'Task 2',
+//     author : 'Author 2',
+//     deadline: "10.05.2024"
+//   },
+//   {
+//     title : 'Task 3',
+//     author : 'Author 3',
+//     deadline: "01.05.2025"
+//   }
+// ]
 
-const mockTasks: Task[] = [
-  {
-    title : 'Task 1',
-    author : 'Author 1',
-    deadline: "10.05.2025"
-  },
-  {
-    title : 'Task 2',
-    author : 'Author 2',
-    deadline: "10.05.2024"
-  },
-  {
-    title : 'Task 3',
-    author : 'Author 3',
-    deadline: "01.05.2025"
-  }
-]
 
 
 const App = () => {
 
-  const [tasks, setTasks] = useState(mockTasks)
+  // const [tasks, setTasks] = useState(mockTasks)
+  const [tasks, setTasks] = useState<Task[]>([])
 
+  //fetch 
+  useEffect(() => {
+    getTasks().then(data => setTasks(data || []))
+  }
+  ,[])
 
   return (
     <>
