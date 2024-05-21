@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { TaskType } from "../App";
 import { MdClose as CloseIcon } from "react-icons/md";
-import { RegExp } from "../lib/constants";
+import { ROUTE, RegExp } from "../lib/constants";
+import { Link } from "react-router-dom";
 
 type AddTaskProps = {
   setTasks: React.Dispatch<React.SetStateAction<TaskType[]>>;
@@ -10,9 +11,12 @@ type AddTaskProps = {
 const AddTask = ({ setTasks }: AddTaskProps) => {
   const [taskName, setTaskName] = useState("");
   const [deadline, setDeadline] = useState("");
+  const [taskAuthor, setTaskAuthor] = useState("");
 
   const [taskNameError, setTaskNameError] = useState(false);
   const [deadlineError, setDeadlineError] = useState(false);
+  const [taskAuthorError, setTaskAuthorError] = useState(false);
+
   // ZAD DOM zrobic walidacje tekstu dla Author
   // zrobic to reuzywalne na wielu wartosciach ( dynamiczne)
 
@@ -24,12 +28,37 @@ const AddTask = ({ setTasks }: AddTaskProps) => {
     setDeadlineError(false);
   };
 
+  const hideTaskAuthorError = () => {
+    setTaskAuthorError(false);
+  };
+
   function handleAddTask() {
     if (taskName.length == 0) {
       setTaskNameError(true);
     }
     if (!RegExp.deadline.test(deadline)) {
       setDeadlineError(true);
+    }
+    if (taskAuthor.length == 0) {
+      setTaskAuthorError(true);
+    }
+
+    if (
+      taskName.length > 0 &&
+      RegExp.deadline.test(deadline) &&
+      taskAuthor.length > 0
+    ) {
+      console.log("CREATED");
+      setTasks((prevTasks) => {
+        console.log([
+          ...prevTasks,
+          { title: taskName, author: taskAuthor, deadline: deadline },
+        ]);
+        return [
+          ...prevTasks,
+          { title: taskName, author: taskAuthor, deadline: deadline },
+        ];
+      });
     }
     // setTasks(prevTasks => [
     //     ...prevTasks,
@@ -49,7 +78,9 @@ const AddTask = ({ setTasks }: AddTaskProps) => {
   return (
     <section>
       <div className="flex justify-between items-center p-4">
-        <CloseIcon size={24} />
+        <Link to={ROUTE.HOME}>
+          <CloseIcon size={24} />
+        </Link>
         <h1 className="text-xl">Create new task</h1>
         <button onClick={handleAddTask} className="text-primary font-bold">
           Save
@@ -72,7 +103,13 @@ const AddTask = ({ setTasks }: AddTaskProps) => {
           <label className="absolute -top-3 left-2 bg-secondary">
             Task author
           </label>
-          <input className="border h-14 p-4" type="text" />
+          <input
+            onInput={(input) => setTaskAuthor(input.currentTarget.value)}
+            className="border h-14 p-4"
+            type="text"
+            onFocus={hideTaskAuthorError}
+          />
+          {taskAuthorError && <p>Author field is empty. Please add text</p>}
         </div>
         <div className="flex flex-col relative">
           <label className="absolute -top-3 left-2 bg-secondary">
@@ -85,7 +122,7 @@ const AddTask = ({ setTasks }: AddTaskProps) => {
             type="text"
           />
           {deadlineError && (
-            <p>Deadline is in a wrong format (DD/YY/YYYY). Please correct</p>
+            <p>Deadline is in a wrong format (DD/MM/YYYY). Please correct</p>
           )}
         </div>
       </form>
