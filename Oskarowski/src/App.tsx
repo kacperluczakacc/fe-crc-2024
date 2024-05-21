@@ -1,7 +1,11 @@
 import { useState } from "react";
 import { TaskType } from "./types/Task";
-import TaskListComponent from "./components/TaskList.tsx";
-import AddTaskComponent from "./components/AddTask.tsx";
+
+import {AddTask, TaskList} from "./pages";
+import { Header } from "./components/Header.tsx";
+
+import { Route, Switch } from "react-router-dom";
+import { ROUTE } from "./lib/routes.ts";
 
 const mockTasks: TaskType[] = [
     {
@@ -24,18 +28,19 @@ const mockTasks: TaskType[] = [
 function App() {
     const [tasks, setTask] = useState(mockTasks);
 
-    
-
     return (
-        <main className="p-4 m-0">
-            <section className="mt-2 flex flex-col">
-                <h1 className="text-4xl text-center mb-3 font-bold">Tasks:</h1>
-                
-                <AddTaskComponent setTask={setTask} />
-                <TaskListComponent tasks={tasks} />
-
-            </section>
-        </main>
+        <>
+            <Header></Header>
+            <h1 className="mb-3 text-4xl font-bold text-center bg-secondary">Tasks:</h1>
+            <Switch>
+                <Route path={ROUTE.HOME}>
+                    <TaskList tasks={tasks}></TaskList>
+                </Route>
+                <Route path="/add-task">
+                    <AddTask setTask={setTask}></AddTask>
+                </Route>
+            </Switch>
+        </>
     );
 }
 
