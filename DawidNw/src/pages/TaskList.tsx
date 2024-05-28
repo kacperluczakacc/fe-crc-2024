@@ -1,15 +1,14 @@
 import Task from '../components/Task'
-import { TaskT } from '../App'
 import { Link } from 'react-router-dom'
 import { ROUTE } from '../lib/constants'
 import { IoMdAdd } from "react-icons/io";
 import { MdFilterList } from "react-icons/md";
+import { useTypedSelector } from '../store';
 
-type TaskListT = {
-    tasks: TaskT[]
-}
+export default function TaskList() {
 
-export default function TaskList({ tasks }: TaskListT) {
+    const tasks = useTypedSelector(state => state.tasks.taskList)
+
     return (
         <>
             <section className='p-4'>
@@ -22,8 +21,10 @@ export default function TaskList({ tasks }: TaskListT) {
                     <MdFilterList className="cursor-pointer" size={24} />
                 </div>
 
-                {tasks.map(task => (
-                    <Task key={task.title.replace(/ /g, '-')} title={task.title} author={task.author} deadline={task.deadline} />
+                <p>Overall you have: {tasks.length} tasks</p>
+
+                {tasks.map((task, i) => (
+                    <Task key={task.title.replace(/ /g, '-')} title={task.title} author={task.author} deadline={task.deadline} keyindex={i} />
                 ))}
 
             </section>
