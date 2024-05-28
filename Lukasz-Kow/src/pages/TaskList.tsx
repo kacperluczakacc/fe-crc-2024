@@ -4,12 +4,13 @@ import Task from "../components/Task"
 import { ROUTE } from '../lib/constants';
 import { IoIosAdd as AddIcon } from "react-icons/io";
 import { MdFilterList as FilterIcon } from "react-icons/md";
+import { taskSlice } from '../store/features/tasks/taskSlice';
+import { useTypedSelector } from "../store";
 
-type TaskListType = {
-    tasks: TaskType[]
-}
 
-export default function TaskList({ tasks }: TaskListType) {
+
+export default function TaskList() {
+    const tasks = useTypedSelector(state => state.tasks.taskList)
     return (
         <section className="p-4">
             <div className="flex justify-between items-center mb-4">

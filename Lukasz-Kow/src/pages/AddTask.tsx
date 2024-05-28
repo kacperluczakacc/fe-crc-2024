@@ -1,67 +1,81 @@
 import { MdClose as CloseIcon } from "react-icons/md";
 
 import { useEffect, useState } from "react"
-import { Task } from "../App"
-import { RegExp, ROUTE } from "../lib/constants";
-import { Link } from "react-router-dom";
+import { AddTaskError, ROUTE } from '../lib/constants';
+import { Link, useHistory } from "react-router-dom";
+import { DatePicker } from "@mui/x-date-pickers";
+import dayjs, { Dayjs } from "dayjs";
+import { addTask } from "../store/features/tasks/taskSlice";
+import { useTypedDispatch } from "../store";
 
-type AddTaskProps = {
-    setTasks: React.Dispatch<React.SetStateAction<Task[]>>
+
+enum CustomDate {
+    TODAY,
+    TOMORROW,
 }
 
 
 
-export default function AddTask({ setTasks }: AddTaskProps) {
-    const [taskName, setTaskName] = useState('');
-    const [author, setAuthor] = useState('');
-    const [deadline, setDeadline] = useState('');
-    const [connection, setConnection] = useState(false)
+export default function AddTask() {
+    const updateStore = useTypedDispatch();
+    const history = useHistory();
 
-    const [authorError, setAuthorError] = useState(false)
-    const [taskNameError, setTaskNameError] = useState(false)
-    const [deadlineError, setDeadlineError] = useState(false)
+    const [deadline, setDeadline] = useState<Dayjs | null>(null);
+    const [customButtonDate, setCustomButtonDate] = useState<CustomDate | null>(
+        null
+    );
 
+    const [taskName, setTaskName] = useState("");
+    const [author, setAuthor] = useState("");
 
-    function hideTaskNameError() {
-        setTaskNameError(false)
-    }
+    const [taskNameError, setTaskNameError] = useState(false);
+    const [deadlineError, setDeadlineError] = useState(false);
+    const [authorError, setAuthorError] = useState(false);
 
-    function hideAuthorError() {
-        setAuthorError(false)
-    }
-    function hideDeadlineError() {
-        setDeadlineError(false)
+    const isTaskNameValid = taskName.length >= 3;
+    const isAuthorValid = author.length >= 3;
+    const isDeadlineValid = deadline !== null;
+
+    function setErrors() {
+        setTaskNameError(!isTaskNameValid);
+        setAuthorError(!isAuthorValid);
+        setDeadlineError(!isDeadlineValid);
     }
 
     useEffect(() => {
-        setTaskNameError(taskName.length > 0 && taskName.length < 3)
-
-    }, [taskName])
+        setTaskNameError(taskName.length > 0 && !isTaskNameValid);
+        setAuthorError(author.length > 0 && !isAuthorValid);
+    }, [taskName, author]);
 
     useEffect(() => {
-        if (!taskNameError && taskName !== '' && deadline !== '' && !deadlineError && author !== '' && !authorError) {
-            setConnection(true)
+        if (customButtonDate === null) {
+            setDeadline(null);
         } else {
-            setConnection(false)
+            setDeadline(
+                customButtonDate === CustomDate.TODAY ? dayjs() : dayjs().add(1, "day")
+            );
+            setDeadlineError(false);
         }
-    }, [taskName, author, deadline, taskNameError])
+    }, [customButtonDate]);
 
-    function handleAddTask() {
-        taskName === '' && setTaskNameError(true)
-        taskName.length > 0 && taskName.length <= 2 && setTaskNameError(true)
-        deadline === '' && deadline.length < 1 ? setDeadlineError(true) : setDeadlineError(false)
-        author === '' && setAuthorError(true)
-
-        RegExp.DEADLINE.test(deadline) ? setDeadlineError(false) : setDeadlineError(true)
-
-        if (connection) {
-            setTasks(prevTasks => [...prevTasks, { title: taskName, author: author, deadline: deadline }])
+    function handleSaveClick() {
+        if (isTaskNameValid && isAuthorValid && isDeadlineValid) {
+            updateStore(
+                addTask({
+                    title: taskName,
+                    author,
+                    deadline: deadline.toString(),
+                })
+            );
+            history.push(ROUTE.HOME);
+        } else {
+            setErrors();
         }
-
     }
 
-
-
+    function handleCustomButtonClick(date: CustomDate) {
+        setCustomButtonDate((prevValue) => (prevValue === date ? null : date));
+    }
 
     return (
         <section>
@@ -70,44 +84,55 @@ export default function AddTask({ setTasks }: AddTaskProps) {
                     <CloseIcon size={24} />
                 </Link>
                 <h1 className="text-xl">Create New Task</h1>
-                <Link to={connection ? ROUTE.HOME : ROUTE.ADD_TASKS}>
-                    <button onClick={handleAddTask} className="text-primary font-bold ">
-                        Save
-                    </button>
-                </Link>
+                <button
+                    onClick={handleSaveClick}
+                    className="text-primary font-bold "
+                >
+                    Save
+                </button>
+
+
             </div>
 
             <form className="flex flex-col gap-10 my-6 px-5 ">
                 <div className="flex flex-col relative">
                     <label className="absolute -top-2 bg-secoundary px-2 text-xs mx-2">Task name:</label>
-                    <input onFocus={hideTaskNameError} onInput={(input) => setTaskName(input.currentTarget.value)} className={`border h-14 p-4 ${taskNameError && 'border-red-500'}`}
+                    <input onInput={(input) => setTaskName(input.currentTarget.value)} className={`border h-14 p-4`}
                         type='text'
                     />
 
                     <p className='text-red-500 h-5 text-sm'>
-                        {(taskName.length > 0 && taskName.length <= 2 && 'Title should be at least 3 characters') ||
-                            (taskNameError && 'Title is required.')}
+                        {taskNameError && <p className="text-red-500">{AddTaskError.TASK_NAME}</p>}
                     </p>
                 </div>
 
                 <div className="flex flex-col relative">
                     <label className="absolute -top-2 bg-secoundary px-2 text-xs mx-2">Author:</label>
-                    <input onFocus={hideAuthorError} onInput={(input) => setAuthor(input.currentTarget.value)} className={`border h-14 p-4 ${authorError && 'border-red-500'}`}
+                    <input onInput={(input) => setAuthor(input.currentTarget.value)} className={`border h-14 p-4`}
                         type='text'
                     />
-                    <p className='text-red-500 h-5 text-sm'>{authorError && 'Author is required.'}</p>
+                    <p className='text-red-500 h-5 text-sm'>{authorError && <p>{AddTaskError.AUTHOR}</p>}</p>
                 </div>
 
-                <div className="flex flex-col relative">
-                    <label className="absolute -top-2 bg-secoundary px-2 text-xs mx-2">Deadline:</label>
-                    <input onFocus={hideDeadlineError} onInput={(input) => setDeadline(input.currentTarget.value)} className={`border h-14 p-4 ${deadlineError && 'border-red-500'}`} type="text" />
-                    <p className='text-red-500 h-5 text-sm'>
-                        {(!RegExp.DEADLINE.test(deadline) &&
-                            deadline.length > 0 &&
-                            'Deadline is in a wrong format (DD/MM/YYYY). Please correct') ||
-                            (deadlineError && 'Deadline is required.')}
-                    </p>
+                <div className="flex gap-1">
+                    <button type="button" onClick={() => handleCustomButtonClick(CustomDate.TODAY)}
+                        className={`border rounded-lg px-4 py-1 border-slate-300 hover:bg-primary hover:text-white ${customButtonDate === CustomDate.TODAY ? 'bg-primary text-white' : ""}`} >
+                        Today </button>
+                    <button type="button" onClick={() => handleCustomButtonClick(CustomDate.TOMORROW)}
+                        className={`border rounded-lg px-4 py-1 border-slate-300 hover:bg-primary hover:text-white ${customButtonDate === CustomDate.TOMORROW ? "bg-primary text-white " : ""}`}>
+                        Tomorrow</button>
                 </div>
+                <p>Select date</p>
+                <DatePicker
+                    value={customButtonDate !== null ? null : deadline}
+                    onChange={(date) => {
+                        setDeadline(date)
+                    }}
+                    onOpen={() => setCustomButtonDate(null)}
+                    format="DD/MM/YYYY"
+                />
+                <p className='text-red-500 h-5 text-sm'>{deadlineError && <p>{AddTaskError.DEADLINE}</p>} </p>
+
             </form>
         </section >
     )
