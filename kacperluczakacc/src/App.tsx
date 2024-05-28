@@ -10,7 +10,6 @@ import { AddTask, TaskList } from './pages';
 import { Route, Switch } from "react-router-dom";
 import { ROUTE } from "./lib/constants";
 import Header from "./components/Header";
-import { sortByNewest } from "./lib/helpers/dates";
 
 export type Task = {
     title: string;
@@ -18,40 +17,19 @@ export type Task = {
     deadline: string;
 }
 
-// "Coming from server"
-const mockTasks: Task[] = [
-    {
-        title: "Task 1",
-        author: "Kacper",
-        deadline: "18/09/2025"
-    },
-    {
-        title: "Task 2",
-        author: "Tomek",
-        deadline: "18/09/2024"
-    },
-    {
-        title: "Task 3",
-        author: "Gosia",
-        deadline: "18/01/2025"
-    }
-];
-
 // Hooks to wbudowane funkcje/narzędzia, które pozwalają nam w prosty sposób manipulować
 // różnymi elementami/cyklami komponentów w React.js
 
 const App = () => {
-    const [tasks, setTasks] = useState(mockTasks);
-
     return (
         <>  
             <Header />
             <Switch>
                 <Route path={ROUTE.ADD_TASK}>
-                    <AddTask setTasks={setTasks} />
+                    <AddTask />
                 </Route>
                 <Route path={ROUTE.HOME}>
-                    <TaskList tasks={tasks} />
+                    <TaskList />
                 </Route>
             </Switch>
         </>
