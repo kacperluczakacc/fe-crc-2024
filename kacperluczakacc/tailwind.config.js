@@ -13,6 +13,10 @@ export default {
       textColor: {
         secondary: "#FEF7FF",
         primary: "#68548E"
+      },
+      borderColor: {
+        secondary: "#FEF7FF",
+        primary: "#68548E"
       }
     },
   },

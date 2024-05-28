@@ -3,6 +3,8 @@ export const ROUTE = {
   ADD_TASK: "/add-tasks",
 };
 
-export const RegExp = {
-  deadline: /^(3[01]|[12][0-9]|0?[1-9])(\/|-)(1[0-2]|0?[1-9])\2([0-9]{2})?[0-9]{2}$/
-}
+export const ERROR = {
+  TASK_NAME: "Task name should be at least 3 characters long",
+  AUTHOR: "Author should be at least 3 characters long",
+  DEADLINE: "Deadline is required to be set",
+};
