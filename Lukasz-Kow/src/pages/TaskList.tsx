@@ -1,10 +1,8 @@
 import { Link } from "react-router-dom"
-import { Task as TaskType } from "../App"
 import Task from "../components/Task"
 import { ROUTE } from '../lib/constants';
 import { IoIosAdd as AddIcon } from "react-icons/io";
 import { MdFilterList as FilterIcon } from "react-icons/md";
-import { taskSlice } from '../store/features/tasks/taskSlice';
 import { useTypedSelector } from "../store";
 
 

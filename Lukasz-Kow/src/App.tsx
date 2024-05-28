@@ -1,11 +1,7 @@
-import { useState } from "react"
-
 import { AddTask, TaskList } from "./pages"
-
 import { Route, Switch } from "react-router-dom"
 import { ROUTE } from "./lib/constants"
 import Header from "./components/Header"
-import dayjs, { Dayjs } from "dayjs"
 
 export type Task = {
     title: string
