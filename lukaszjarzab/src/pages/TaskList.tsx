@@ -1,15 +1,13 @@
 import { Link } from "react-router-dom";
-import { TaskType } from "../App";
 import Task from "../components/Task";
 import { ROUTE } from "../lib/constants";
 import { IoMdAdd as AddIcon } from "react-icons/io";
 import { MdFilterList as FilterIcon } from "react-icons/md";
+import { useTypedSelector } from "../store";
 
-type TaskListType = {
-  tasks: TaskType[];
-};
+const TaskList = () => {
+  const tasks = useTypedSelector((state) => state.tasks.tasks);
 
-const TaskList = ({ tasks }: TaskListType) => {
   return (
     <section className="p-4">
       <div className="flex flex-row justify-between items-center mb-4">
