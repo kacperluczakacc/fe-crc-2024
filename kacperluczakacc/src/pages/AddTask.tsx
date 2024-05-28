@@ -1,21 +1,20 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { MdClose as CloseIcon } from "react-icons/md";
-import { Task } from "../App";
-import { AddTaskError, ROUTE, RegExp } from "../lib/constants";
+import { AddTaskError, ROUTE } from "../lib/constants";
 import { DatePicker } from "@mui/x-date-pickers";
 import dayjs, { Dayjs } from "dayjs";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
+import { useTypedDispatch } from "../store";
+import { addTask } from "../store/features/tasks/taskSlice";
 
 enum CustomDate {
   TODAY,
   TOMORROW,
 }
+export default function AddTask() {
+  const updateStore = useTypedDispatch();
+  const history = useHistory();
 
-type AddTaskProps = {
-  setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
-};
-
-export default function AddTask({ setTasks }: AddTaskProps) {
   const [deadline, setDeadline] = useState<Dayjs | null>(null);
   const [customButtonDate, setCustomButtonDate] = useState<CustomDate | null>(
     null
@@ -41,20 +40,29 @@ export default function AddTask({ setTasks }: AddTaskProps) {
   useEffect(() => {
     setTaskNameError(taskName.length > 0 && !isTaskNameValid);
     setAuthorError(author.length > 0 && !isAuthorValid);
-  }, [taskName, author])
+  }, [taskName, author]);
 
   useEffect(() => {
     if (customButtonDate === null) {
       setDeadline(null);
     } else {
-      setDeadline(customButtonDate === CustomDate.TODAY ? dayjs() : dayjs().add(1, "day"));
+      setDeadline(
+        customButtonDate === CustomDate.TODAY ? dayjs() : dayjs().add(1, "day")
+      );
       setDeadlineError(false);
     }
   }, [customButtonDate]);
 
   function handleSaveClick() {
     if (isTaskNameValid && isAuthorValid && isDeadlineValid) {
-      console.log("Task added!");
+      updateStore(
+        addTask({
+          title: taskName,
+          author,
+          deadline: deadline.toString(),
+        })
+      );
+      history.push(ROUTE.HOME);
     } else {
       setErrors();
     }
@@ -85,7 +93,9 @@ export default function AddTask({ setTasks }: AddTaskProps) {
             className="border h-14 p-4"
             type="text"
           />
-          {taskNameError && <p className="text-red-500">{AddTaskError.TASK_NAME}</p>}
+          {taskNameError && (
+            <p className="text-red-500">{AddTaskError.TASK_NAME}</p>
+          )}
         </div>
 
         <div className="flex flex-col relative">
