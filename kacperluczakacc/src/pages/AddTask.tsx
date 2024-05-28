@@ -1,50 +1,77 @@
 import { useEffect, useRef, useState } from "react";
 import { MdClose as CloseIcon } from "react-icons/md";
 import { Task } from "../App";
-import { RegExp } from "../lib/constants";
+import { AddTaskError, ROUTE, RegExp } from "../lib/constants";
+import { DatePicker } from "@mui/x-date-pickers";
+import dayjs, { Dayjs } from "dayjs";
+import { Link } from "react-router-dom";
+
+enum CustomDate {
+  TODAY,
+  TOMORROW,
+}
 
 type AddTaskProps = {
   setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
 };
 
 export default function AddTask({ setTasks }: AddTaskProps) {
+  const [deadline, setDeadline] = useState<Dayjs | null>(null);
+  const [customButtonDate, setCustomButtonDate] = useState<CustomDate | null>(
+    null
+  );
+
   const [taskName, setTaskName] = useState("");
-  const [deadline, setDeadline] = useState("");
-  
+  const [author, setAuthor] = useState("");
+
   const [taskNameError, setTaskNameError] = useState(false);
   const [deadlineError, setDeadlineError] = useState(false);
-  // ZAD. DOMOWE -> zrobić walidację tekstu dla Author
+  const [authorError, setAuthorError] = useState(false);
 
-  function hideTaskError() {
-    setTaskNameError(false);
-  }
+  const isTaskNameValid = taskName.length >= 3;
+  const isAuthorValid = author.length >= 3;
+  const isDeadlineValid = deadline !== null;
 
-  function hideDeadlineError() {
-    setDeadlineError(false);
+  function setErrors() {
+    setTaskNameError(!isTaskNameValid);
+    setAuthorError(!isAuthorValid);
+    setDeadlineError(!isDeadlineValid);
   }
 
   useEffect(() => {
-    setTaskNameError(taskName.length === 1);
-    setDeadlineError(RegExp.deadline.test(deadline));
-  }, [taskName, deadline]);
+    setTaskNameError(taskName.length > 0 && !isTaskNameValid);
+    setAuthorError(author.length > 0 && !isAuthorValid);
+  }, [taskName, author])
 
-  function handleAddTask() {
-    /*       setTasks((prevTasks) => [
-        ...prevTasks,
-        {
-          title: taskNameRef.current!.value,
-          author: authorRef.current!.value,
-          deadline: deadlineRef.current!.value,
-        },
-      ]); */
+  useEffect(() => {
+    if (customButtonDate === null) {
+      setDeadline(null);
+    } else {
+      setDeadline(customButtonDate === CustomDate.TODAY ? dayjs() : dayjs().add(1, "day"));
+      setDeadlineError(false);
+    }
+  }, [customButtonDate]);
+
+  function handleSaveClick() {
+    if (isTaskNameValid && isAuthorValid && isDeadlineValid) {
+      console.log("Task added!");
+    } else {
+      setErrors();
+    }
+  }
+
+  function handleCustomButtonClick(date: CustomDate) {
+    setCustomButtonDate((prevValue) => (prevValue === date ? null : date));
   }
 
   return (
     <section>
       <div className="flex justify-between items-center p-4">
-        <CloseIcon size={24} />
+        <Link to={ROUTE.HOME}>
+          <CloseIcon size={24} />
+        </Link>
         <h1 className="text-xl">Create new task</h1>
-        <button onClick={handleAddTask} className="text-primary font-bold">
+        <button className="text-primary font-bold" onClick={handleSaveClick}>
           Save
         </button>
       </div>
@@ -54,51 +81,67 @@ export default function AddTask({ setTasks }: AddTaskProps) {
             Task name
           </label>
           <input
-            onFocus={hideTaskError}
             onInput={(input) => setTaskName(input.currentTarget.value)}
             className="border h-14 p-4"
             type="text"
           />
-          {taskNameError && <p>Task name is empty. Please add text.</p>}
+          {taskNameError && <p className="text-red-500">{AddTaskError.TASK_NAME}</p>}
         </div>
 
         <div className="flex flex-col relative">
           <label className="absolute -top-3 left-2 bg-secondary px-2">
             Author
           </label>
-          <input className="border h-14 p-4" type="text" />
-        </div>
-
-        <div className="flex flex-col relative">
-          <label className="absolute -top-3 left-2 bg-secondary px-2">
-            Deadline
-          </label>
           <input
-          onFocus={hideDeadlineError}
-            onInput={(input) => setDeadline(input.currentTarget.value)}
             className="border h-14 p-4"
             type="text"
+            onInput={(input) => setAuthor(input.currentTarget.value)}
           />
-          {deadlineError && <p>Deadline is in a wrong format (DD/MM/YYYY). Please correct.</p>}
+          {authorError && <p className="text-red-500">{AddTaskError.AUTHOR}</p>}
+        </div>
+
+        <div className="flex gap-4">
+          <button
+            type="button"
+            onClick={() => handleCustomButtonClick(CustomDate.TODAY)}
+            className={`border rounded-lg px-4 py-1 border-slate-300 hover:bg-primary hover:text-white ${
+              customButtonDate === CustomDate.TODAY
+                ? "bg-primary text-white"
+                : ""
+            } `}
+          >
+            Today
+          </button>
+          <button
+            type="button"
+            onClick={() => handleCustomButtonClick(CustomDate.TOMORROW)}
+            className={`border rounded-lg px-4 py-1 border-slate-300 hover:bg-primary hover:text-white ${
+              customButtonDate === CustomDate.TOMORROW
+                ? "bg-primary text-white"
+                : ""
+            }`}
+          >
+            Tomorrow
+          </button>
+        </div>
+
+        <p>or select your date</p>
+
+        <div>
+          <DatePicker
+            className="w-full"
+            value={customButtonDate !== null ? null : deadline}
+            onChange={(date) => {
+              setDeadline(date);
+              setDeadlineError(false);
+            }}
+            onOpen={() => setCustomButtonDate(null)}
+            format="DD/MM/YYYY"
+          />
+          {deadlineError && <p>{AddTaskError.DEADLINE}</p>}
         </div>
       </form>
     </section>
+    // TEMPLATE LITERAL
   );
-}
-
-{
-  /* <button
-onClick={handleAddTask}
-type="button" className="border border-solid">
-ADD TASK
-</button>
-<form className="flex flex-col gap-1 my-2">
-<label>Task name:</label>
-<input ref={taskNameRef}
-    className="border" type="text" />
-<label>Author:</label>
-<input ref={authorRef} className="border" type="text" />
-<label>Deadline:</label>
-<input ref={deadlineRef} className="border" type="text" />
-</form> */
 }

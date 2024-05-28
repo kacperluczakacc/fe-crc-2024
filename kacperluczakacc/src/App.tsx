@@ -11,11 +11,12 @@ import { Route, Switch } from "react-router-dom";
 import { ROUTE } from "./lib/constants";
 import Header from "./components/Header";
 import { sortByNewest } from "./lib/helpers/dates";
+import dayjs, { Dayjs } from "dayjs";
 
 export type Task = {
     title: string;
     author: string;
-    deadline: string;
+    deadline: Dayjs;
 }
 
 // "Coming from server"
@@ -23,17 +24,17 @@ const mockTasks: Task[] = [
     {
         title: "Task 1",
         author: "Kacper",
-        deadline: "18/09/2025"
+        deadline: dayjs("18/09/2025")
     },
     {
         title: "Task 2",
         author: "Tomek",
-        deadline: "18/09/2024"
+        deadline: dayjs("18/09/2024")
     },
     {
         title: "Task 3",
         author: "Gosia",
-        deadline: "18/01/2025"
+        deadline: dayjs("18/01/2025")
     }
 ];
 
