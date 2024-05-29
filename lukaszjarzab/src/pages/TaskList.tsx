@@ -6,7 +6,7 @@ import { MdFilterList as FilterIcon } from "react-icons/md";
 import { useTypedSelector } from "../store";
 
 const TaskList = () => {
-  const tasks = useTypedSelector((state) => state.tasks.tasks);
+  const tasks = useTypedSelector((state) => state.tasks.taskList);
 
   return (
     <section className="p-4">

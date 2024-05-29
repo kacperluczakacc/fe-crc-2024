@@ -13,22 +13,14 @@ export type TaskType = {
 
 const App = () => {
   return (
-    // <main className="p-4">
-    //   <section className="flex flex-col gap-8">
-    //     <h1 className="text-4xl font-bold">My tasks</h1>
-    //     <AddTask setTasks={setTasks} />
-    //     <TaskList tasks={tasks} />
-    //   </section>
-    // </main>
-
     <>
       <Header />
       <Switch>
         <Route path={ROUTE.ADD_TASK}>
-          <AddTask setTasks={setTasks} />
+          <AddTask />
         </Route>
         <Route path={ROUTE.HOME}>
-          <TaskList tasks={tasks} />
+          <TaskList />
         </Route>
       </Switch>
     </>

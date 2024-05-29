@@ -1,6 +1,11 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
-import dayjs from "dayjs";
-import { TaskType } from "../../App";
+import dayjs, { Dayjs } from "dayjs";
+
+export type TaskType = {
+  title: string;
+  author: string;
+  deadline: Dayjs;
+};
 
 interface TaskState {
   tasks: TaskType[];
@@ -37,4 +42,5 @@ export const taskSlice = createSlice({
 });
 
 export const { addTask } = taskSlice.actions;
+
 export default taskSlice.reducer;

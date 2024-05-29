@@ -6,18 +6,14 @@ import { Link, useHistory } from "react-router-dom";
 import { DatePicker } from "@mui/x-date-pickers";
 import dayjs, { Dayjs } from "dayjs";
 import { useTypedDispatch } from "../store";
-import { addTask } from "../features/task/taskSlice";
+import { addTask } from "../store/features/task/taskSlice";
 
 enum CustomDate {
   TODAY,
   TOMORROW,
 }
 
-type AddTaskProps = {
-  setTasks: React.Dispatch<React.SetStateAction<TaskType[]>>;
-};
-
-const AddTask = ({ setTasks }: AddTaskProps) => {
+const AddTask = () => {
   const history = useHistory();
   const updateStore = useTypedDispatch();
   const [taskName, setTaskName] = useState("");
@@ -42,7 +38,7 @@ const AddTask = ({ setTasks }: AddTaskProps) => {
   }
 
   useEffect(() => {
-    setTaskNameError(taskName.length > 0! && isTaskNameValid);
+    setTaskNameError(taskName.length > 0 && !isTaskNameValid);
     setTaskAuthorError(taskAuthor.length > 0 && !isAuthorValid);
   }, [taskName, taskAuthor]);
 
@@ -59,10 +55,6 @@ const AddTask = ({ setTasks }: AddTaskProps) => {
 
   const hideTaskNameError = () => {
     setTaskNameError(false);
-  };
-
-  const hideDeadlineError = () => {
-    setDeadlineError(false);
   };
 
   const hideTaskAuthorError = () => {

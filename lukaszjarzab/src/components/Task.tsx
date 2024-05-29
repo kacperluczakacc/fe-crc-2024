@@ -19,7 +19,7 @@ const Task = ({ title, author, deadline }: TaskType) => {
       className="bg-secondary active:bg-primary rounded-2xl my-4 p-4 flex justify-between items-center"
     >
       <div>
-        <p>{deadline}</p>
+        <p>{deadline.format("DD/MM/YYYY")}</p>
         <p className="text-xl font-bold">{title}</p>
         <p className="text-slate-600">{author}</p>
       </div>
