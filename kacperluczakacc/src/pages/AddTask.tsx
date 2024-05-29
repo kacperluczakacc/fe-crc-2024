@@ -4,15 +4,13 @@ import { AddTaskError, ROUTE } from "../lib/constants";
 import { DatePicker } from "@mui/x-date-pickers";
 import dayjs, { Dayjs } from "dayjs";
 import { Link, useHistory } from "react-router-dom";
-import { useTypedDispatch } from "../store";
-import { addTask } from "../store/features/tasks/taskSlice";
+import { Endpoint } from "../api/constants";
 
 enum CustomDate {
   TODAY,
   TOMORROW,
 }
 export default function AddTask() {
-  const updateStore = useTypedDispatch();
   const history = useHistory();
 
   const [deadline, setDeadline] = useState<Dayjs | null>(null);
@@ -53,16 +51,26 @@ export default function AddTask() {
     }
   }, [customButtonDate]);
 
-  function handleSaveClick() {
+  async function addNewTaskToServer() {
+    const response = await fetch(Endpoint.TASKS, {
+      method: "POST",
+      body: JSON.stringify({
+        title: taskName,
+        author,
+        deadline: deadline?.toString()
+      })
+    });
+
+    return response;
+  }
+
+  async function handleSaveClick() {
     if (isTaskNameValid && isAuthorValid && isDeadlineValid) {
-      updateStore(
-        addTask({
-          title: taskName,
-          author,
-          deadline: deadline.toString(),
-        })
-      );
-      history.push(ROUTE.HOME);
+      const response = await addNewTaskToServer();
+
+      if (response.ok) {
+        history.push(ROUTE.HOME);
+      } 
     } else {
       setErrors();
     }
