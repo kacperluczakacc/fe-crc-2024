@@ -3,10 +3,43 @@ import Task from "../components/Task";
 import { ROUTE } from "../lib/constants";
 import { IoMdAdd as AddIcon } from "react-icons/io";
 import { MdFilterList as FilterIcon } from "react-icons/md";
-import { useTypedSelector } from "../store";
+import { Endpoint } from "../api/constants";
+import { useEffect, useState } from "react";
+import { TaskType } from "../App";
+import { IoMdTrash as TrashIcon } from "react-icons/io";
 
 const TaskList = () => {
-  const tasks = useTypedSelector((state) => state.tasks.taskList);
+  const [tasks, setTasks] = useState<TaskType[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [checkedTaskId, setCheckedTaskId] = useState("");
+
+  async function getAllTasks() {
+    setIsLoading(true);
+
+    const response = await fetch(Endpoint.TASKS);
+    const tasks = await response.json();
+
+    if (tasks) {
+      setIsLoading(false);
+      setTasks(tasks);
+    } else {
+      setIsLoading(false);
+      setError("Something went wrong");
+    }
+  }
+
+  async function deleteTask(id: string) {
+    await fetch(`${Endpoint.TASKS}/${id}`, {
+      method: "DELETE",
+    });
+    setCheckedTaskId("");
+    getAllTasks();
+  }
+
+  useEffect(() => {
+    getAllTasks();
+  }, []);
 
   return (
     <section className="p-4">
@@ -17,16 +50,30 @@ const TaskList = () => {
             New To-do
           </button>
         </Link>
-        <FilterIcon size={24} />
+        <div className="flex gap-4">
+          <FilterIcon size={24} />
+          {checkedTaskId !== "" && (
+            <TrashIcon size={24} onClick={() => deleteTask(checkedTaskId)} />
+          )}
+        </div>
       </div>
-      {tasks.map((task) => (
-        <Task
-          key={task.title.replace(/ /g, "-")}
-          title={task.title}
-          author={task.author}
-          deadline={task.deadline}
-        />
-      ))}
+
+      {isLoading ? (
+        <p>Loading...</p>
+      ) : error.length > 0 ? (
+        <p>{error}</p>
+      ) : (
+        tasks.map((task) => (
+          <Task
+            key={task.title.replace(/ /g, "-")}
+            title={task.title}
+            author={task.author}
+            deadline={task.deadline}
+            id={task.id}
+            setCheckedTaskId={setCheckedTaskId}
+          />
+        ))
+      )}
     </section>
   );
 };

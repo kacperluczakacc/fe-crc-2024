@@ -1,12 +1,11 @@
-import { useEffect, useRef, useState } from "react";
-import { TaskType } from "../App";
+import { useEffect, useState } from "react";
 import { MdClose as CloseIcon } from "react-icons/md";
-import { AddTaskError, ROUTE, RegExp } from "../lib/constants";
+import { AddTaskError, ROUTE } from "../lib/constants";
 import { Link, useHistory } from "react-router-dom";
 import { DatePicker } from "@mui/x-date-pickers";
 import dayjs, { Dayjs } from "dayjs";
-import { useTypedDispatch } from "../store";
-import { addTask } from "../store/features/task/taskSlice";
+// import { useTypedDispatch } from "../store";
+import { Endpoint } from "../api/constants";
 
 enum CustomDate {
   TODAY,
@@ -15,7 +14,7 @@ enum CustomDate {
 
 const AddTask = () => {
   const history = useHistory();
-  const updateStore = useTypedDispatch();
+  // const updateStore = useTypedDispatch();
   const [taskName, setTaskName] = useState("");
   const [deadline, setDeadline] = useState<Dayjs | null>(null);
   const [customButtonDate, setCustomButtonDate] = useState<CustomDate | null>(
@@ -65,18 +64,35 @@ const AddTask = () => {
     setCustomButtonDate((prev) => (prev === date ? null : date));
   }
 
-  function handleAddTask() {
+  async function addNewTaskToServer() {
+    const response = await fetch(Endpoint.TASKS, {
+      method: "POST",
+      body: JSON.stringify({
+        title: taskName,
+        author: taskAuthor,
+        deadline: deadline?.toString(),
+      }),
+    });
+
+    return response;
+  }
+
+  async function handleAddTask() {
     if (isTaskNameValid && isAuthorValid && isDeadlineValid) {
-      updateStore(
-        addTask({
-          title: taskName,
-          author: taskAuthor,
-          deadline: deadline,
-        })
-      );
-      history.push(ROUTE.HOME);
-    } else {
-      setErrors();
+      // updateStore(
+      //   addTask({
+      //     title: taskName,
+      //     author: taskAuthor,
+      //     deadline: deadline,
+      //   })
+      // );
+      const response = await addNewTaskToServer();
+
+      if (response.ok) {
+        history.push(ROUTE.HOME);
+      } else {
+        setErrors();
+      }
     }
   }
 
