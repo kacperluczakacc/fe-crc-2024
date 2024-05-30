@@ -1,50 +1,46 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
-import dayjs, { Dayjs } from "dayjs";
+import dayjs from "dayjs";
 
-export type TaskT = {
-    title: string,
-    author: string,
-    deadline: Dayjs,
-  }
+export type Task = {
+  title: string;
+  author: string;
+  deadline: string;
+};
 
 interface TaskState {
-    taskList: TaskT[]
+  taskList: Task[];
 }
 
 const initialTaskState: TaskState = {
-    taskList: [
-        {
-            title: "Task 1",
-            author: "Dawid",
-            deadline: dayjs("18-04-2024")
-        },
-        {
-            title: "Task 2",
-            author: "Dawid",
-            deadline: dayjs("18-04-2024")
-        },
-        {
-            title: "Task 3",
-            author: "Dawid",
-            deadline: dayjs("18-04-2024")
-        },
-    ]
-}
+  taskList: [
+    {
+      title: "Task 1",
+      author: "Kacper",
+      deadline: dayjs("2025-09-01").toString(),
+    },
+    {
+      title: "Task 2",
+      author: "Tomek",
+      deadline: dayjs("2024-11-12").toString(),
+    },
+    {
+      title: "Task 3",
+      author: "Gosia",
+      deadline: dayjs("2026-02-04").toString(),
+    },
+  ],
+};
 
 export const taskSlice = createSlice({
-    name: 'tasks',
-    initialState: initialTaskState,
-    reducers: {
-        addTask: (state, action: PayloadAction<TaskT>) => {
-            state.taskList.push(action.payload)
-        },
-        dropTask: (state, action) => {
-            state.taskList.splice(action.payload, 1)
-        }
-    }
-})
+  name: "tasks",
+  initialState: initialTaskState,
+  reducers: {
+    addTask: (state, action: PayloadAction<Task>) => {
+      state.taskList.push(action.payload);
+    },
+  },
+});
 
-export const {addTask } = taskSlice.actions
-export const {dropTask } = taskSlice.actions
+export const { addTask } = taskSlice.actions;
 
-export default taskSlice.reducer
+export default taskSlice.reducer;

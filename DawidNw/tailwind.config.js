@@ -7,12 +7,12 @@ export default {
   theme: {
     extend: {
       backgroundColor: {
-        light: '#FEF7FF',
-        dark: '#68548E'
+        secondary: "#FEF7FF",
+        primary: "#68548E"
       },
       textColor: {
-        light: '#FEF7FF',
-        dark: '#68548E'
+        secondary: "#FEF7FF",
+        primary: "#68548E"
       }
     },
   },
