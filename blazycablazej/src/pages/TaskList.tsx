@@ -13,8 +13,7 @@ export default function TaskList() {
   const [tasks, setState] = useState<TaskType[]>([]);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [checkedTaskId, setCheckedTaskId] = useState("");
-
+  const [taskIds, setTaskIds] = useState<string[] | null>(null) ;
   async function getAllTasks() {
     setIsLoading(true);
 
@@ -30,17 +29,33 @@ export default function TaskList() {
     }
   }
 
-  async function deleteTask(id: string) {
-    await fetch(`${Endpoint.TASKS}/${id}`, {
-      method: "DELETE",
-    });
-    setCheckedTaskId('');
-    getAllTasks();
+  async function deleteTask() {
+    if (taskIds && taskIds.length > 0) {
+      const deletePromises = taskIds.map(id =>
+          fetch(`${Endpoint.TASKS}/${id}`, { method: "DELETE" })
+      );
+      await Promise.all(deletePromises);
+      setTaskIds(null);
+      getAllTasks();
+    }
   }
+
+
+  const toggleTaskCheck = (id: string) => {
+    if (taskIds?.includes(id)) {
+      const newArray = taskIds.filter(el => el !== id);
+      setTaskIds(newArray);
+    } else {
+      setTaskIds(prev => prev ? [...prev, id] : [id]);
+    }
+  };
+
 
   useEffect(() => {
     getAllTasks();
   }, []);
+
+
 
   return (
     <section className="p-4">
@@ -53,8 +68,8 @@ export default function TaskList() {
         </Link>
         <div className="flex gap-4">
           <FilterIcon size={24} />
-          {checkedTaskId !== "" && (
-            <TrashIcon size={24} onClick={() => deleteTask(checkedTaskId)} />
+          {taskIds?.length &&(
+            <TrashIcon size={24} onClick={() => deleteTask()} />
           )}
         </div>
       </div>
@@ -66,12 +81,14 @@ export default function TaskList() {
       ) : (
         tasks.map((task) => (
           <Task
-            key={task.title.replace(/ /g, "-")}
+            id={task.id}
+              key={task.title.replace(/ /g, "-")}
             title={task.title}
             author={task.author}
+
             deadline={task.deadline}
-            id={task.id}
-            setCheckedTaskId={setCheckedTaskId}
+            setCheckedTaskId={() => toggleTaskCheck(task.id)}
+            isChecked={taskIds?.includes(task.id)}
           />
         ))
       )}
