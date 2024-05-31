@@ -13,7 +13,22 @@ export default function TaskList() {
   const [tasks, setTasks] = useState<TaskType[]>([]);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [checkedTaskId, setCheckedTaskId] = useState("");
+
+  const [checkedTasksId, setCheckedTasksId] = useState<string[]>([])
+
+  function addCheckedTask(id: string) {
+    setCheckedTasksId([...checkedTasksId, id])
+  }
+
+  function dropCheckedTask(id: string) {
+    setCheckedTasksId(checkedTasksId.filter(tid => tid != id))
+  }
+
+  function deleteTasks() {
+    checkedTasksId.forEach((val) => {
+      deleteTask(val).then(() => dropCheckedTask(val))
+    })
+  }
 
   async function getAllTasks() {
     setIsLoading(true);
@@ -34,7 +49,6 @@ export default function TaskList() {
     await fetch(`${Endpoint.TASKS}/${id}`, {
       method: "DELETE",
     });
-    setCheckedTaskId('');
     getAllTasks();
   }
 
@@ -52,9 +66,9 @@ export default function TaskList() {
           </button>
         </Link>
         <div className="flex gap-4">
-          <FilterIcon size={24} />
-          {checkedTaskId !== "" && (
-            <TrashIcon size={24} onClick={() => deleteTask(checkedTaskId)} />
+          <FilterIcon onClick={() => console.log(checkedTasksId)} size={24} />
+          {checkedTasksId.length > 0 && (
+            <TrashIcon className="cursor-pointer" size={24} onClick={() => deleteTasks()} />
           )}
         </div>
       </div>
@@ -71,7 +85,8 @@ export default function TaskList() {
             author={task.author}
             deadline={task.deadline}
             id={task.id}
-            setCheckedTaskId={setCheckedTaskId}
+            addCheckedTask={addCheckedTask}
+            dropCheckedTask={dropCheckedTask}
           />
         ))
       )}
