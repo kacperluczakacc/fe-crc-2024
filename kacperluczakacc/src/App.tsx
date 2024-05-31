@@ -13,6 +13,14 @@ export type Task = {
   id: string;
 };
 
+export type InputText = {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  error: boolean;
+  errorMessage: string;
+};
+
 // Czym jest Promise?
 // Każda funkcja asynchroniczna zwraca Promise - czyli obiekt
 // który reprezentuje jakąś ewentualną wartość
