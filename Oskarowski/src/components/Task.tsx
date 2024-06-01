@@ -1,16 +1,28 @@
 import {
-    MdCheckBoxOutlineBlank as EmptyCheckBox,
-    MdCheckBox as CheckedCheckbox,
+  MdOutlineCheckBoxOutlineBlank as EmptyCheckbox,
+  MdOutlineCheckBox as CheckedCheckbox,
 } from "react-icons/md";
 
-import { TaskType } from "../types/Task.ts";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-function Task({ title, author, deadline }: TaskType) {
+type TaskProps = {
+    title: string;
+    author: string;
+    deadline: string;
+    id: string;
+    setCheckedTaskId: React.Dispatch<React.SetStateAction<string>>;
+};
+
+function Task({ title, author, deadline, id, setCheckedTaskId }: TaskProps) {
     const [isChecked, setIsChecked] = useState(false);
 
+    useEffect(() => {
+        console.log("isChecked state updated to:", isChecked);
+    }, [isChecked]);
+
     function toggleCheck() {
-        setIsChecked(prevState => !prevState);
+        setCheckedTaskId((prevValue) => (prevValue === id ? "" : id));
+        setIsChecked((prevState) => !prevState);
     }
 
     return (
@@ -20,10 +32,14 @@ function Task({ title, author, deadline }: TaskType) {
         >
             <div>
                 <p>{deadline}</p>
-                <p className="font-bold ">{title}</p>
+                <p className="font-bold">{title}</p>
                 <p className="text-slate-600">{author}</p>
             </div>
-            {isChecked ? <CheckedCheckbox size={24} /> : <EmptyCheckBox size={24} />}
+            {isChecked ? (
+                <CheckedCheckbox size={24} />
+            ) : (
+                <EmptyCheckbox size={24} />
+            )}
         </div>
     );
 }

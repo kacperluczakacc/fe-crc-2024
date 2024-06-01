@@ -1,4 +1,4 @@
 export const ROUTE = {
-    HOME: "//",
+    HOME: "/home",
     ADD_TASK: "/add-task",
 };
