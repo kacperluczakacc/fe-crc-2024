@@ -1,43 +1,58 @@
-import { useState } from "react";
 import Task from "./components/Task";
-import TaskList from "./components/TaskList";
-import AddTask from "./components/AddTask";
+
+import { Route, Switch } from "react-router-dom";
+import { AddTask, TaskList } from "./pages";
+import Header from "./components/Header";
 
 export type Task = {
   title: string;
   author: string;
   deadline: string;
+  id: string;
 };
 
-const mockTasks: Task[] = [
-  {
-    title: "Task 1",
-    author: "Oliwer",
-    deadline: "18/09/2024",
-  },
-  {
-    title: "Task 2",
-    author: "Wiktoria",
-    deadline: "22/10/2025",
-  },
-  {
-    title: "Task 3",
-    author: "Andrzej",
-    deadline: "8/01/2026",
-  },
-];
-
 const App = () => {
-  const [tasks, setTasks] = useState(mockTasks);
+  async function getTasks() {
+    const response = await fetch("http://localhost:3000/tasks");
+    const data = await response.json();
+    console.log(data);
+  }
 
+  getTasks();
+
+  async function addNewTask() {
+    await fetch("http://localhost:3000/tasks", {
+      method: "POST",
+      body: JSON.stringify({
+        title: "New task no. 4",
+        author: "Kacper",
+        deadline: "19/09/2025",
+      }),
+    });
+  }
+  async function updateTask(id: string) {
+    const response = await fetch(`http://localhost:3000/tasks/${id}`, {
+      method: "PUT", // aktualizacja danych dla elementu w bazie danych reprezentowanych przed podany ID
+      body: JSON.stringify({
+        title: "Updated task no. 4",
+      }),
+    });
+    console.log(response);
+  }
+  updateTask("9168");
+  addNewTask();
   return (
-    <main className="p-4">
-      <section className="flex flex-col gap-8">
-        <h1 className="text-4xl font-bold">My Tasks</h1>
-        <AddTask setTasks={setTasks} />
-        <TaskList tasks={tasks} />
-      </section>
-    </main>
+    <>
+      <Header />
+      <Switch>
+        <Route path="/add-tasks">
+          <AddTask />
+        </Route>
+        <Route path="/">
+          <TaskList />
+        </Route>
+      </Switch>
+    </>
   );
 };
 
