@@ -1,16 +1,44 @@
 import { Link } from 'react-router-dom'
-import { Task as TaskType } from '../App'
 import Task from '../components/Task'
 import { ROUTE } from '../lib/constants'
 import { MdFilterList } from 'react-icons/md'
+import { IoMdAdd, IoMdTrash } from 'react-icons/io'
+import { useEffect, useState } from 'react'
+import { Task as TaskType } from '../App'
+import { Endpoint } from '../api/constans'
 
-import { IoMdAdd } from 'react-icons/io'
+const TaskList = () => {
+	const [tasks, setTasks] = useState<TaskType[]>([])
+	const [isLoading, setIsLoading] = useState(false)
+	const [error, setError] = useState('')
+	const [checkedTaskId, setCheckedTaskId] = useState<string[]>([])
 
-type taskListType = {
-	tasks: TaskType[]
-}
+	const getAllTasks = async () => {
+		setIsLoading(true)
+		const res = await fetch(Endpoint.TASKS)
+		const tasks = await res.json()
 
-const TaskList = ({ tasks }: taskListType) => {
+		if (tasks) {
+			setIsLoading(false)
+			setTasks(tasks)
+		} else {
+			setIsLoading(false)
+			setError('Something went wrong. Please try again.')
+		}
+	}
+
+	const deleteTask = async (id: string) => {
+		await fetch(`${Endpoint.TASKS}/${id}`, {
+			method: 'DELETE',
+		})
+		setCheckedTaskId([])
+		getAllTasks()
+	}
+
+	useEffect(() => {
+		getAllTasks()
+	}, [])
+
 	return (
 		<section className='p-4'>
 			<div className='flex justify-between items-center mb-4'>
@@ -20,17 +48,34 @@ const TaskList = ({ tasks }: taskListType) => {
 						New To-do
 					</button>
 				</Link>
-				<MdFilterList className='ml-auto' size={24} />
+				<div className='flex gap-4'>
+					<MdFilterList className='hover:cursor-pointer' size={24} />
+					{checkedTaskId.length > 0 && (
+						<IoMdTrash
+							onClick={() => checkedTaskId.forEach(taskId => deleteTask(taskId))}
+							className='hover:cursor-pointer hover:text-red-500 transition-colors'
+							size={24}
+						/>
+					)}
+				</div>
 			</div>
 
-			{tasks.map(task => (
-				<Task
-					key={task?.title.replace(/ /g, '-')}
-					title={task?.title}
-					author={task?.author}
-					deadline={task?.deadline}
-				/>
-			))}
+			{isLoading ? (
+				<p>Loading...</p>
+			) : error.length > 0 ? (
+				<p>{error}</p>
+			) : (
+				tasks.map(task => (
+					<Task
+						id={task?.id}
+						key={task?.id}
+						title={task?.title}
+						author={task?.author}
+						deadline={task?.deadline}
+						setCheckedTaskId={setCheckedTaskId}
+					/>
+				))
+			)}
 		</section>
 	)
 }
