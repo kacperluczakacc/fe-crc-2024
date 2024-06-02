@@ -20,3 +20,12 @@ export const addTask = async (task: TaskType) => {
         console.error(error)
     }
 }
+export const deleteTask = async (id: string) => {
+    try {
+        const response = await axios.delete<TaskType>(`${api_url}/Tasks/${id}`)
+        return response.data
+    } catch (error) {
+        console.error(error)
+    }
+}
+export default { getTasks, addTask, deleteTask }
