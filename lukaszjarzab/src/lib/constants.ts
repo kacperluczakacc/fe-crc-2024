@@ -16,6 +16,8 @@ export const AddTaskError = {
   DEADLINE:
     "Deadline is not set. Please click the date buttons or set the date from the datepicker",
 };
-// export const RegExp__ = {
-//   deadline:/^(3[01]|[12][0-9]|0?[1-9])(/|-)(1[0-2]|0?[1-9])\2([0-9]{2})?[0-9]{2}$/
-// };
+
+export enum CustomDate {
+  TODAY,
+  TOMORROW,
+}

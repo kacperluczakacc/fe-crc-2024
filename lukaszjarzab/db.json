@@ -1,0 +1,31 @@
+{
+  "tasks": [
+    {
+      "title": "Lorem ipsum!!!!!",
+      "author": "Kacper Kowalski",
+      "deadline": "18/09/2024",
+      "priority": "High",
+      "status": "In Progress",
+      "additionalInfo": "Lorem ipsum sit dolor amet, consectetur adipiscing elit. Vivamus lacinia odio vitae vestibulum vestibulum. Cras venenatis euismod malesuada.",
+      "id": "bfd5"
+    },
+    {
+      "title": "Develop New Feature",
+      "author": "Tomek Nowak",
+      "deadline": "18/09/2025",
+      "priority": "Medium",
+      "status": "Not Started",
+      "additionalInfo": "Detailed requirements are documented in the project wiki. Ensure compatibility with existing modules.",
+      "id": "112a"
+    },
+    {
+      "title": "UI Redesign",
+      "author": "Gosia Zajac",
+      "deadline": "19/11/2026",
+      "priority": "Low",
+      "status": "Planning",
+      "additionalInfo": "Focus on improving user experience and incorporating feedback from recent user surveys.",
+      "id": "457e"
+    }
+  ]
+}

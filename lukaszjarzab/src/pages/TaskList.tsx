@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import Task from "../components/Task";
 import { ROUTE } from "../lib/constants";
 import { IoMdAdd as AddIcon } from "react-icons/io";
 import { MdFilterList as FilterIcon } from "react-icons/md";
@@ -7,12 +6,13 @@ import { Endpoint } from "../api/constants";
 import { useEffect, useState } from "react";
 import { TaskType } from "../App";
 import { IoMdTrash as TrashIcon } from "react-icons/io";
+import { Task } from "../components";
 
 const TaskList = () => {
   const [tasks, setTasks] = useState<TaskType[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const [checkedTaskId, setCheckedTaskId] = useState("");
+  const [checkedTaskIds, setCheckedTaskIds] = useState<string[]>([]);
 
   async function getAllTasks() {
     setIsLoading(true);
@@ -29,12 +29,14 @@ const TaskList = () => {
     }
   }
 
-  async function deleteTask(id: string) {
-    await fetch(`${Endpoint.TASKS}/${id}`, {
-      method: "DELETE",
+  async function deleteTask(ids: string[]) {
+    ids.forEach(async (id) => {
+      await fetch(`${Endpoint.TASKS}/${id}`, {
+        method: "DELETE",
+      });
+      setCheckedTaskIds([]);
+      getAllTasks();
     });
-    setCheckedTaskId("");
-    getAllTasks();
   }
 
   useEffect(() => {
@@ -52,8 +54,8 @@ const TaskList = () => {
         </Link>
         <div className="flex gap-4">
           <FilterIcon size={24} />
-          {checkedTaskId !== "" && (
-            <TrashIcon size={24} onClick={() => deleteTask(checkedTaskId)} />
+          {checkedTaskIds.length !== 0 && (
+            <TrashIcon size={24} onClick={() => deleteTask(checkedTaskIds)} />
           )}
         </div>
       </div>
@@ -70,7 +72,7 @@ const TaskList = () => {
             author={task.author}
             deadline={task.deadline}
             id={task.id}
-            setCheckedTaskId={setCheckedTaskId}
+            setCheckedTaskIds={setCheckedTaskIds}
           />
         ))
       )}

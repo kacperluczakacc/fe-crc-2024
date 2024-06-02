@@ -1,67 +1,123 @@
-import { useEffect, useState } from "react";
+import { useEffect, useReducer } from "react";
 import { MdClose as CloseIcon } from "react-icons/md";
-import { AddTaskError, ROUTE } from "../lib/constants";
+import { AddTaskError, CustomDate, ROUTE } from "../lib/constants";
 import { Link, useHistory } from "react-router-dom";
 import { DatePicker } from "@mui/x-date-pickers";
 import dayjs, { Dayjs } from "dayjs";
-// import { useTypedDispatch } from "../store";
 import { Endpoint } from "../api/constants";
+import { DateButton, TextInput } from "../components/addTask";
 
-enum CustomDate {
-  TODAY,
-  TOMORROW,
+interface State {
+  taskName: string;
+  taskAuthor: string;
+  deadline: Dayjs | null;
+  customButtonDate: CustomDate | null;
+  taskNameError: boolean;
+  taskAuthorError: boolean;
+  deadlineError: boolean;
+}
+export type Action =
+  | { type: "SET_TASK_NAME"; payload: string }
+  | { type: "SET_TASK_AUTHOR"; payload: string }
+  | { type: "SET_DEADLINE"; payload: Dayjs | null }
+  | { type: "SET_CUSTOM_BUTTON_DATE"; payload: CustomDate | null }
+  | { type: "SET_TASK_NAME_ERROR"; payload: boolean }
+  | { type: "SET_TASK_AUTHOR_ERROR"; payload: boolean }
+  | { type: "SET_DEADLINE_ERROR"; payload: boolean };
+
+const initialState = {
+  taskName: "",
+  taskAuthor: "",
+  deadline: null,
+  customButtonDate: null,
+  taskNameError: false,
+  taskAuthorError: false,
+  deadlineError: false,
+};
+
+function reducer(state: State, action: Action): State {
+  switch (action.type) {
+    case "SET_TASK_NAME":
+      return { ...state, taskName: action.payload };
+    case "SET_TASK_AUTHOR":
+      return { ...state, taskAuthor: action.payload };
+    case "SET_DEADLINE":
+      return { ...state, deadline: action.payload };
+    case "SET_CUSTOM_BUTTON_DATE":
+      return { ...state, customButtonDate: action.payload };
+    case "SET_TASK_NAME_ERROR":
+      return { ...state, taskNameError: action.payload };
+    case "SET_TASK_AUTHOR_ERROR":
+      return { ...state, taskAuthorError: action.payload };
+    case "SET_DEADLINE_ERROR":
+      return { ...state, deadlineError: action.payload };
+    default:
+      return state;
+  }
 }
 
 const AddTask = () => {
   const history = useHistory();
-  // const updateStore = useTypedDispatch();
-  const [taskName, setTaskName] = useState("");
-  const [deadline, setDeadline] = useState<Dayjs | null>(null);
-  const [customButtonDate, setCustomButtonDate] = useState<CustomDate | null>(
-    null
-  );
-  const [taskAuthor, setTaskAuthor] = useState("");
-
-  const [taskNameError, setTaskNameError] = useState(false);
-  const [deadlineError, setDeadlineError] = useState(false);
-  const [taskAuthorError, setTaskAuthorError] = useState(false);
+  const [inputs, dispatch] = useReducer(reducer, initialState);
+  const {
+    taskName,
+    taskAuthor,
+    deadline,
+    customButtonDate,
+    taskNameError,
+    taskAuthorError,
+    deadlineError,
+  } = inputs;
 
   const isTaskNameValid = taskName?.length >= 3;
   const isAuthorValid = taskAuthor?.length >= 3;
   const isDeadlineValid = deadline !== null;
 
   function setErrors() {
-    setTaskNameError(!isTaskNameValid);
-    setTaskAuthorError(!isAuthorValid);
-    setDeadlineError(!isDeadlineValid);
+    dispatch({ type: "SET_TASK_NAME_ERROR", payload: !isTaskNameValid });
+    dispatch({ type: "SET_TASK_AUTHOR_ERROR", payload: !isAuthorValid });
+    dispatch({ type: "SET_DEADLINE_ERROR", payload: !isDeadlineValid });
   }
 
   useEffect(() => {
-    setTaskNameError(taskName.length > 0 && !isTaskNameValid);
-    setTaskAuthorError(taskAuthor.length > 0 && !isAuthorValid);
+    dispatch({
+      type: "SET_TASK_NAME_ERROR",
+      payload: taskName.length > 0 && !isTaskNameValid,
+    });
+    dispatch({
+      type: "SET_TASK_AUTHOR_ERROR",
+      payload: taskAuthor.length > 0 && !isAuthorValid,
+    });
   }, [taskName, taskAuthor]);
 
   useEffect(() => {
     if (customButtonDate === null) {
-      setDeadline(null);
+      dispatch({ type: "SET_DEADLINE", payload: null });
     } else {
-      setDeadline(
-        customButtonDate === CustomDate.TODAY ? dayjs() : dayjs().add(1, "day")
-      );
-      setDeadlineError(false);
+      dispatch({
+        type: "SET_DEADLINE",
+        payload:
+          customButtonDate === CustomDate.TODAY
+            ? dayjs()
+            : dayjs().add(1, "day"),
+      });
+      dispatch({ type: "SET_DEADLINE_ERROR", payload: false });
     }
   }, [customButtonDate]);
 
   const hideTaskNameError = () => {
-    setTaskNameError(false);
+    dispatch({ type: "SET_TASK_NAME_ERROR", payload: false });
   };
 
   const hideTaskAuthorError = () => {
-    setTaskAuthorError(false);
+    dispatch({ type: "SET_TASK_AUTHOR_ERROR", payload: false });
   };
 
   function handleCustomButtonClick(date: CustomDate) {
-    setCustomButtonDate((prev) => (prev === date ? null : date));
+    dispatch({
+      type: "SET_CUSTOM_BUTTON_DATE",
+      payload: customButtonDate === date ? null : date,
+    });
   }
 
   async function addNewTaskToServer() {
@@ -70,7 +126,7 @@ const AddTask = () => {
       body: JSON.stringify({
         title: taskName,
         author: taskAuthor,
-        deadline: deadline?.toString(),
+        deadline: deadline?.add(1, "day").toString(),
       }),
     });
 
@@ -79,13 +135,6 @@ const AddTask = () => {
 
   async function handleAddTask() {
     if (isTaskNameValid && isAuthorValid && isDeadlineValid) {
-      // updateStore(
-      //   addTask({
-      //     title: taskName,
-      //     author: taskAuthor,
-      //     deadline: deadline,
-      //   })
-      // );
       const response = await addNewTaskToServer();
 
       if (response.ok) {
@@ -108,67 +157,51 @@ const AddTask = () => {
         </button>
       </div>
       <form className="flex flex-col gap-10 my-6 px-5">
-        <div className="flex flex-col relative">
-          <label className="absolute -top-3 left-2 bg-secondary">
-            Task name
-          </label>
-          <input
-            onInput={(input) => setTaskName(input.currentTarget.value)}
-            className="border h-14 p-4"
-            type="text"
-            onFocus={hideTaskNameError}
-          />
-          {taskNameError && (
-            <p className="text-red-500">{AddTaskError.TASK_NAME}</p>
-          )}
-        </div>
-        <div className="flex flex-col relative">
-          <label className="absolute -top-3 left-2 bg-secondary">
-            Task author
-          </label>
-          <input
-            onInput={(input) => setTaskAuthor(input.currentTarget.value)}
-            className="border h-14 p-4"
-            type="text"
-            onFocus={hideTaskAuthorError}
-          />
-          {taskAuthorError && (
-            <p className="text-red-500">{AddTaskError.AUTHOR}</p>
-          )}
-        </div>
+        <TextInput
+          dispatch={dispatch}
+          dispatchType="SET_TASK_NAME"
+          hideTaskError={hideTaskNameError}
+          taskError={taskNameError}
+          label="Task name"
+          taskErrorText={AddTaskError.TASK_NAME}
+        />
+        <TextInput
+          dispatch={dispatch}
+          dispatchType="SET_TASK_AUTHOR"
+          hideTaskError={hideTaskAuthorError}
+          taskError={taskAuthorError}
+          label="Task author"
+          taskErrorText={AddTaskError.AUTHOR}
+        />
+
         <div className="flex gap-4">
-          <button
-            type="button"
-            onClick={() => handleCustomButtonClick(CustomDate.TODAY)}
-            className={`border rounded-lg px-4 py-1 border-slate-300 hover:bg-primary hover:text-white ${
-              customButtonDate === CustomDate.TODAY
-                ? "bg-primary text-white"
-                : ""
-            }`}
-          >
-            Today
-          </button>
-          <button
-            type="button"
-            onClick={() => handleCustomButtonClick(CustomDate.TOMORROW)}
-            className={`border rounded-lg px-4 py-1 border-slate-300 hover:bg-primary hover:text-white ${
-              customButtonDate === CustomDate.TOMORROW
-                ? "bg-primary text-white"
-                : ""
-            }`}
-          >
-            Tomorrow
-          </button>
+          <DateButton
+            handleCustomButtonClick={handleCustomButtonClick}
+            customButtonDate={customButtonDate}
+            day={CustomDate.TODAY}
+            text="Today"
+          />
+          <DateButton
+            handleCustomButtonClick={handleCustomButtonClick}
+            customButtonDate={customButtonDate}
+            day={CustomDate.TOMORROW}
+            text="Tomorrow"
+          />
         </div>
         <p>or select your date</p>
         <DatePicker
           className="w-full"
           value={customButtonDate !== null ? null : deadline}
           onChange={(date) => {
-            setDeadlineError(false);
-            setDeadline(date);
+            dispatch({ type: "SET_DEADLINE_ERROR", payload: false });
+            dispatch({
+              type: "SET_DEADLINE",
+              payload: date ? dayjs(date) : null,
+            });
           }}
-          onOpen={() => setCustomButtonDate(null)}
+          onOpen={() =>
+            dispatch({ type: "SET_CUSTOM_BUTTON_DATE", payload: null })
+          }
           format="DD/MM/YYYY"
         />
         {deadlineError && (
