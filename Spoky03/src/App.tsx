@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useContext, useEffect } from 'react'
 import { Task } from './components/task'
 import { TaskList } from './components/taskList'
 import { AddTaskForm } from './components/addTaskForm'
@@ -30,7 +30,7 @@ const App = () => {
   useEffect(() => {
     dispatch(initializeTasks())
     notifyDispatch({type: 'SET', payload: 'Welcome to the task manager'})
-  })
+  }, [dispatch])
 
   return (
     <>
@@ -39,7 +39,7 @@ const App = () => {
       <Header />
       
       <p className='min-h-8 bg-primary text-white text-center'>{notify}</p>
-
+      
       <div className='flex flex-col gap-5'>
         <Switch>
           <Route path={ROUTE.ADD_TASK}>

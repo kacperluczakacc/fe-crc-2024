@@ -29,6 +29,9 @@ export const useNotifyValue = () => {
 
 export const useNotifyDispatch = () => {
   const notifyAndDispatch = useContext(NotifyContext)
+  setTimeout(() => {
+    notifyAndDispatch[1]({type: 'CLEAR'})
+  }, 5000)
   return notifyAndDispatch[1]
 }
 export default NotifyContext
