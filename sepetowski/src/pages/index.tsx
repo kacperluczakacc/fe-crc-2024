@@ -1,2 +1,2 @@
-export { AddTask } from './AddTask';
-export { Home } from './Home';
+export { default as AddTask } from './AddTask';
+export { default as TaskList } from './TaskList';
