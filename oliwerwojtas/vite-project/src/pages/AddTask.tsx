@@ -5,6 +5,8 @@ import { AddTaskError } from "../lib/constants";
 import { DatePicker } from "@mui/x-date-pickers";
 import dayjs, { Dayjs } from "dayjs";
 import { Link, useHistory } from "react-router-dom";
+import CustomButton from "../components/reusable/CustomButton";
+import FormField from "../components/reusable/FormField";
 
 enum CustomDate {
   TODAY,
@@ -17,7 +19,7 @@ export default function AddTask() {
 
   const [customButtonDate, setCustomButtonDate] = useState<CustomDate | null>(null);
   const [author, setAuthor] = useState("");
-  const [taskName, setTaskName] = useState("");
+  const [taskName, setTaskName] = useState<string>("");
   const [taskNameError, setTaskNameError] = useState(false);
   const [deadlineError, setDeadlineError] = useState(false);
   const [authorError, setAuthorError] = useState(false);
@@ -28,6 +30,8 @@ export default function AddTask() {
 
   function setErrors() {
     setTaskNameError(!isTaskNameValid);
+    setAuthorError(!isAuthorValid);
+    setDeadlineError(!isDeadlineValid);
   }
   useEffect(() => {
     setTaskNameError(taskName.length > 0 && !isTaskNameValid);
@@ -83,45 +87,32 @@ export default function AddTask() {
         </button>
       </div>
       <form className="flex flex-col gap-10 my-6 px-5">
-        <div className="flex flex-col relative">
-          <label className="absolute -top-3 left-2 bg-secondary px-2">Task name</label>
-          <input
-            onInput={(input) => setTaskName(input.currentTarget.value)}
-            className="border h-14 p-4"
-            type="text"
-          />
-          {taskNameError && <p className="text-red-600">{AddTaskError.TASK_NAME}</p>}
-        </div>
-
-        <div className="flex flex-col relative">
-          <label className="absolute -top-3 left-2 bg-secondary px-2">Author</label>
-          <input
-            onInput={(input) => setAuthor(input.currentTarget.value)}
-            className="border h-14 p-4"
-            type="text"
-          />
-          {authorError && <p className="text-red-600">{AddTaskError.AUTHOR}</p>}
-        </div>
+        <FormField
+          label="Task name"
+          value={taskName}
+          onChange={(e) => setTaskName(e.target.value)}
+          error={taskNameError && AddTaskError.TASK_NAME}
+        />
+        <FormField
+          label="Author"
+          value={author}
+          onChange={(e) => setAuthor(e.target.value)}
+          error={authorError && AddTaskError.AUTHOR}
+        />
 
         <div>
-          <button
-            type="button"
+          <CustomButton
+            isActive={customButtonDate === CustomDate.TODAY}
             onClick={() => handleCustomButtonClick(CustomDate.TODAY)}
-            className={`border hover:text-white hover:bg-primary ${
-              customButtonDate === CustomDate.TODAY ? "bg-primary text-white" : ""
-            }`}
           >
             Today
-          </button>
-          <button
-            type="button"
+          </CustomButton>
+          <CustomButton
+            isActive={customButtonDate === CustomDate.TOMORROW}
             onClick={() => handleCustomButtonClick(CustomDate.TOMORROW)}
-            className={`border hover:text-white hover:bg-primary ${
-              customButtonDate === CustomDate.TOMORROW ? "bg-primary text-white" : ""
-            }`}
           >
             Tomorrow
-          </button>
+          </CustomButton>
         </div>
         <p>or select your date</p>
         <DatePicker
