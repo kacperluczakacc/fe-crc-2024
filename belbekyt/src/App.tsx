@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import Task from "./components/Task.tsx";
 
 import { AddTask, TaskList } from './pages';
 
@@ -11,40 +10,45 @@ export type TaskType = {
   title: string;
   author: string;
   deadline: string;
+  id: string;
 }
 
+async function getTasks() {
+  const resposnse = await fetch('http://localhost:3000/tasks');
+  const data = await resposnse.json();
+}
 
-const mockTasks: TaskType[] = [
-  {
-    title: 'Task 1',
-    author: 'Miłosz',
-    deadline: '18/09/2025'
-  },
-  {
-    title: 'Task 2',
-    author: 'Rafał',
-    deadline: '18/09/2024'
-  },
-  {
-    title: 'Task 3',
-    author: 'gosia',
-    deadline: '18/01/2025'
-  }
-]
+async function addNewTask() {
+  const resposnse = await fetch('http://localhost:3000/tasks', {
+    method: "POST",
+    body: JSON.stringify({
+      title: "New task",
+      author: "Miłosz",
+      deadline: "19/09/2025" 
+    })
+  });
+}
 
+async function updateTask(id: string){
+  const resposnse = await fetch(`http://localhost:3000/tasks/${id}`, {
+    method: "PUT",
+    body: JSON.stringify({
+      title: "Updated task no. 4"
+    })
+  });
+}
 
-function App() {
-  const [tasks, setTasks] = useState(mockTasks);
+const App = () => {
 
   return (
     <>
       <Header />
       <Switch>
         <Route path={ROUTE.ADD_TASK}>
-          <AddTask setTasks={setTasks}/>
+          <AddTask />
         </Route>
         <Route path={ROUTE.HOME}>
-          <TaskList tasks={tasks}/>
+          <TaskList />
         </Route>
       </Switch>
     </>
