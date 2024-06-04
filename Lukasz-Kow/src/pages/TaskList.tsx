@@ -10,10 +10,10 @@ import { useEffect, useState } from "react";
 import { Task as TaskType } from "../App";
 
 export default function TaskList() {
-    const [tasks, setState] = useState<TaskType[]>([]);
+    const [tasks, setTasks] = useState<TaskType[]>([]);
     const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
-    const [checkedTaskId, setCheckedTaskId] = useState("");
+    const [checkedTaskIds, setCheckedTaskIds] = useState<string[]>([]);
 
     async function getAllTasks() {
         setIsLoading(true);
@@ -23,18 +23,20 @@ export default function TaskList() {
 
         if (tasks) {
             setIsLoading(false);
-            setState(tasks);
+            setTasks(tasks);
         } else {
             setIsLoading(false);
             setError("Something went wrong. Please try again.");
         }
     }
 
-    async function deleteTask(id: string) {
-        await fetch(`${Endpoint.TASKS}/${id}`, {
-            method: "DELETE",
-        });
-        setCheckedTaskId('');
+    async function deleteTasks(ids: string[]) {
+        await Promise.all(ids.map(id =>
+            fetch(`${Endpoint.TASKS}/${id}`, {
+                method: "DELETE",
+            })
+        ));
+        setCheckedTaskIds([]);
         getAllTasks();
     }
 
@@ -53,8 +55,8 @@ export default function TaskList() {
                 </Link>
                 <div className="flex gap-4">
                     <FilterIcon size={24} />
-                    {checkedTaskId !== "" && (
-                        <TrashIcon size={24} onClick={() => deleteTask(checkedTaskId)} />
+                    {checkedTaskIds.length !== 0 && (
+                        <TrashIcon size={24} onClick={() => deleteTasks(checkedTaskIds)} />
                     )}
                 </div>
             </div>
@@ -71,7 +73,7 @@ export default function TaskList() {
                         author={task.author}
                         deadline={task.deadline}
                         id={task.id}
-                        setCheckedTaskId={setCheckedTaskId}
+                        setCheckedTaskIds={setCheckedTaskIds}
                     />
                 ))
             )}
