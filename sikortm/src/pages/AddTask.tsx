@@ -1,11 +1,12 @@
 import { MdClose as CloseIcon } from 'react-icons/md'
 
-import { useState } from "react";
+import { useReducer, useState } from "react";
 import { ROUTE } from '../lib/constants';
 import { FormError, FormLabeledInput } from '../components';
 import { Link, useHistory } from "react-router-dom";
 import { DatePicker } from '@mui/x-date-pickers';
-import dayjs, { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
+import { RegExp } from '../lib/constants';
 // import { useTypedDispatch } from '../store';
 // import { addTask } from '../store/features/tasks/taskSlice';
 import { Endpoint } from '../api/constants';
@@ -17,29 +18,47 @@ enum CustomDate {
 
 export type FormInputType = 'title' | 'author' | 'deadline';
 
-export type FormErrorType = 'empty' | 'too-short' | '';
+export type FormErrorType = 'empty' | 'too-short' | 'wrong-format' | '';
 
-export function validateTextInput(value : string, errorFunc : React.Dispatch<React.SetStateAction<FormErrorType>>) : boolean {
+export function validateTextInput(type: string, value : string, errorFunc : React.Dispatch<TaskAction>) : boolean {
     if (value.trim().length == 0) {
-        errorFunc('empty');
+        errorFunc({ type: type, newString: '', newError: 'empty' });
         return true;
     }
     if (value.trim().length > 0 && value.trim().length < 3) {
-        errorFunc('too-short');
+        errorFunc({ type: type, newString: '', newError: 'too-short' });
         return true;
     }
-    errorFunc('');
+    errorFunc({ type: type, newString: '', newError: '' });
     return false;
 }
 
-export function validateDateInput(value : Dayjs | null, customDate: CustomDate | null, errorFunc : React.Dispatch<React.SetStateAction<FormErrorType>>) : boolean {
-
-    if (value == null && customDate == null) {
-        errorFunc('empty');
+export function validateDateInput(type: string, value : string, customDate: CustomDate | null, errorFunc : React.Dispatch<TaskAction>) : boolean {
+    if (value == '' && customDate == null) {
+        errorFunc({ type: type, newString: '', newError: 'empty' });
         return true;
     }
-    errorFunc('');
+    if (RegExp.deadline.test(value) && customDate == null) {
+        errorFunc({ type: type, newString: '', newError: 'wrong-format' });
+        return true;
+    }
+    errorFunc({ type: type, newString: '', newError: '' });
     return false;
+}
+
+interface TaskState {
+    taskName: string;
+    author: string;
+    deadline: string;
+    titleError: FormErrorType;
+    authorError: FormErrorType;
+    deadlineError: FormErrorType;
+}
+
+export interface TaskAction {
+    type: string;
+    newString: string;
+    newError: FormErrorType;
 }
 
 export default function AddTask() {
@@ -49,35 +68,46 @@ export default function AddTask() {
 
     const [customButtonDate, setCustomButtonDate] = useState<CustomDate | null>(null);
 
-    const [taskName, setTaskName] = useState<string>('');
-    const [author, setAuthor] = useState<string>('');
-    const [deadline, setDeadline] = useState<Dayjs | null>(null);
+    const taskReducer = (task: TaskState, action: TaskAction) => {
+        switch(action.type) {
+            case 'title': return { ...task, taskName: action.newString };
+            case 'author': return { ...task, author: action.newString };
+            case 'deadline': return { ...task, deadline: action.newString };
+            case 'titleError': return { ...task, titleError: action.newError };
+            case 'authorError': return { ...task, authorError: action.newError };
+            case 'deadlineError': return { ...task, deadlineError: action.newError };
+            default: return task;
+        }
+    }
 
-    const [taskNameError, setTaskNameError] = useState<FormErrorType>('');
-    const [authorError, setAuthorError] = useState<FormErrorType>('');
-    const [deadlineError, setDeadlineError] = useState<FormErrorType>('');
+    const [task, taskDispatch] = useReducer(taskReducer, { taskName: '', author: '', deadline: '', titleError: '', authorError: '', deadlineError: '' });
+
+    // const [taskNameError, setTaskNameError] = useState<FormErrorType>('');
+    // const [authorError, setAuthorError] = useState<FormErrorType>('');
+    // const [deadlineError, setDeadlineError] = useState<FormErrorType>('');
 
     function handleCustomButtonClick(date: CustomDate) {
         setCustomButtonDate(prevValue => prevValue == date ? null : date);
-        setDeadline(date != null && date == CustomDate.TODAY ? dayjs() : dayjs().add(1, 'day'));
+        taskDispatch({ type: 'deadline', newString: date != null && date == CustomDate.TODAY ? dayjs().format('DD/MM/YYYY') : dayjs().add(1, 'day').format('DD/MM/YYYY'), newError: '' });
+        taskDispatch({ type: 'deadlineError', newString: '', newError: '' });
     }
 
     const addNewTaskToServer = async () => {
         const response = await fetch(Endpoint.TASKS, {
             method: 'POST',
             body: JSON.stringify({
-                title: taskName,
-                author,
-                deadline: deadline?.toString()
+                title: task.taskName,
+                author: task.author,
+                deadline: task.deadline
             })
         });
         return response;
     }
 
     async function handleAddTask() {
-        const taskNameTrigger = validateTextInput(taskName, setTaskNameError); 
-        const authorTrigger = validateTextInput(author, setAuthorError);
-        const deadlineTrigger = validateDateInput(deadline, customButtonDate, setDeadlineError);
+        const taskNameTrigger = validateTextInput('titleError', task.taskName, taskDispatch); 
+        const authorTrigger = validateTextInput('authorError', task.author, taskDispatch);
+        const deadlineTrigger = validateDateInput('deadlineError', task.deadline, customButtonDate, taskDispatch);
 
         // Chciałem tutaj użyć taskNameError, authorError i deadlineError,
         // ale stan w Reacie aktualizuje się najwidoczniej asynchronicznie,
@@ -111,17 +141,15 @@ export default function AddTask() {
                 <FormLabeledInput
                     title={'Title'}
                     type={'title'}
-                    errorType={taskNameError}
-                    setError={setTaskNameError}
-                    setValue={setTaskName}
+                    errorType={task.titleError}
+                    setValue={taskDispatch}
                 />
 
                 <FormLabeledInput
                     title={'Author'}
                     type={'author'}
-                    errorType={authorError}
-                    setError={setAuthorError}
-                    setValue={setAuthor}
+                    errorType={task.authorError}
+                    setValue={taskDispatch}
                 />
                 
                 <div>
@@ -131,15 +159,15 @@ export default function AddTask() {
                     </div>
                     <p className='my-4'>or select your date</p>
                     <DatePicker 
-                    value={customButtonDate == null ? deadline : null} 
-                    onChange={date => setDeadline(date)} 
-                    onOpen={() => {
-                        setCustomButtonDate(null);
-                        setDeadlineError('');
-                    }}
-                    format='DD/MM/YYYY'
-                    className='text-white'/>
-                    { (deadlineError != '') && <FormError type={'deadline'} errorType={deadlineError} /> }
+                        value={customButtonDate == null ? dayjs(task.deadline) : null} 
+                        onChange={date => taskDispatch({ type: 'deadline', newString: date ? date?.format('DD/MM/YYYY') : '', newError: '' })} 
+                        onOpen={() => {
+                            setCustomButtonDate(null);
+                            taskDispatch({ type: 'deadlineError', newString: '', newError: ''});
+                        }}
+                        format='DD/MM/YYYY' 
+                    />
+                    { (task.deadlineError != '') && <FormError type={'deadline'} errorType={task.deadlineError} /> }
                 </div>
             </form>
         </section>

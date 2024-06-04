@@ -8,7 +8,6 @@ import { Link } from "react-router-dom";
 import { Endpoint } from "../api/constants";
 import { useEffect, useState } from "react";
 import { Task as TaskType } from "../App";
-import dayjs from "dayjs";
 
 export default function TaskList() {
     // const tasks = useTypedSelector(state => state.tasks.taskList)
@@ -73,7 +72,7 @@ export default function TaskList() {
                 key={task.title.replace(/ /g, '-')}
                 title={task.title}
                 author={task.author}
-                deadline={dayjs(task.deadline)}
+                deadline={task.deadline}
                 id={task.id}
                 modifyCheckedTasks={modifyCheckedTasks}
             />)} 

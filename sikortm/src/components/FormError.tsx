@@ -1,6 +1,8 @@
+import { FormErrorType, FormInputType } from "../pages/AddTask";
+
 export default function FormError({type, errorType}: {
-    type: 'title' | 'author' | 'deadline',
-    errorType: 'empty' | 'too-short' | ''
+    type: FormInputType
+    errorType: FormErrorType
     }){
 
     return (
