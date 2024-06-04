@@ -4,7 +4,7 @@
 
 import { AddTask, TaskList } from "./pages";
 import { Route, Switch } from "react-router-dom";
-import { ROUTE } from "./lib/constans.ts";
+import { ROUTE } from "./lib/constants.ts";
 import { Header, Task } from "./components";
 import { Dayjs } from "dayjs";
 
@@ -12,6 +12,7 @@ export type Task = {
   title: string;
   author: string;
   deadline: Dayjs | null;
+  id: string;
 }
 
 // Hooks to wbudowane funkcje/narzędzia, które pozwalają nam w prosty sposób manipulować

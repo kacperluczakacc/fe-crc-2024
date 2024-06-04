@@ -2,11 +2,21 @@ import { MdCheckBoxOutlineBlank as EmptyCheckbox, MdOutlineCheckBox as CheckedCh
 
 import { Task as TaskType } from "../App"
 import { useState } from "react";
+import { Dayjs } from "dayjs";
 
-export default function Task({title, author, deadline}: TaskType){
+type TaskProps = {
+    title: string;
+    author: string;
+    deadline: Dayjs | null;
+    id: string;
+    setCheckedTaskId: React.Dispatch<React.SetStateAction<string>>
+}
+
+export default function Task({title, author, deadline, id, setCheckedTaskId}: TaskProps){
     const [isChecked, setIsChecked] = useState(false);
 
     function toggleCheck() {
+        setCheckedTaskId(prevValue => prevValue == id ? '' : id);
         setIsChecked(prevState => !prevState);
     }
 

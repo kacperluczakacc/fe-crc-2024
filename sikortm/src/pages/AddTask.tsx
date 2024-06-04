@@ -1,13 +1,14 @@
 import { MdClose as CloseIcon } from 'react-icons/md'
 
 import { useState } from "react";
-import { ROUTE } from '../lib/constans';
+import { ROUTE } from '../lib/constants';
 import { FormError, FormLabeledInput } from '../components';
 import { Link, useHistory } from "react-router-dom";
 import { DatePicker } from '@mui/x-date-pickers';
 import dayjs, { Dayjs } from 'dayjs';
-import { useTypedDispatch } from '../store';
-import { addTask } from '../store/features/tasks/taskSlice';
+// import { useTypedDispatch } from '../store';
+// import { addTask } from '../store/features/tasks/taskSlice';
+import { Endpoint } from '../api/constants';
 
 enum CustomDate {
     TODAY,
@@ -42,7 +43,7 @@ export function validateDateInput(value : Dayjs | null, customDate: CustomDate |
 }
 
 export default function AddTask() {
-    const updateStore = useTypedDispatch();
+    // const updateStore = useTypedDispatch();
 
     const routerHistory = useHistory();
 
@@ -61,7 +62,19 @@ export default function AddTask() {
         setDeadline(date != null && date == CustomDate.TODAY ? dayjs() : dayjs().add(1, 'day'));
     }
 
-    function handleAddTask() {
+    const addNewTaskToServer = async () => {
+        const response = await fetch(Endpoint.TASKS, {
+            method: 'POST',
+            body: JSON.stringify({
+                title: taskName,
+                author,
+                deadline: deadline?.toString()
+            })
+        });
+        return response;
+    }
+
+    async function handleAddTask() {
         const taskNameTrigger = validateTextInput(taskName, setTaskNameError); 
         const authorTrigger = validateTextInput(author, setAuthorError);
         const deadlineTrigger = validateDateInput(deadline, customButtonDate, setDeadlineError);
@@ -74,13 +87,16 @@ export default function AddTask() {
         if (taskNameTrigger || authorTrigger || deadlineTrigger)
             return;
 
-        updateStore(addTask({
-            title: taskName,
-            author,
-            deadline
-        }));
+        // updateStore(addTask({
+        //     title: taskName,
+        //     author,
+        //     deadline
+        // }));
 
-        routerHistory.push(ROUTE.HOME);
+        const response = await addNewTaskToServer();
+        if (response.ok)
+            routerHistory.push(ROUTE.HOME);
+
     }
 
     return (
