@@ -1,6 +1,5 @@
 import { MdCheckBoxOutlineBlank as EmptyCheckbox, MdOutlineCheckBox as CheckedCheckbox } from "react-icons/md";
 
-import { Task as TaskType } from "../App"
 import { useState } from "react";
 import { Dayjs } from "dayjs";
 
