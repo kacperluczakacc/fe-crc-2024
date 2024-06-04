@@ -13,7 +13,7 @@ export default function Task({title, author, deadline}: TaskType){
     return (
         <div onClick={toggleCheck} className="bg-secondary rounded-2xl transition-all duration-300 shadow-md my-4 p-4 flex justify-between items-center cursor-pointer active:bg-primary">
             <div>
-                <p>{deadline}</p>
+                <p>{deadline?.format('DD/MM/YYYY')}</p>
                 <p className="text-xl font-bold">{title}</p>
                 <p className="text-slate-600">{author}</p>
             </div>

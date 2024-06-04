@@ -1,11 +1,11 @@
-import { FormInputType, FormErrorType } from "../pages/AddTask";
+import { FormInputType, FormErrorType, validateTextInput } from "../pages/AddTask";
 import { FormError } from "./";
 
 export default function FormLabeledInput({title, type, errorType, setError, setValue}: {
     title: string
     type: FormInputType
     errorType: FormErrorType
-    setError: (error: FormErrorType) => void
+    setError: React.Dispatch<React.SetStateAction<FormErrorType>>
     setValue: (value: string) => void
     }){
     return (
@@ -13,7 +13,10 @@ export default function FormLabeledInput({title, type, errorType, setError, setV
             <label className='absolute -top-3 left-2 bg-secondary px-2'>{title}</label>
             <input 
                 onFocus={() => setError('')}
-                onInput={inputValue => setValue(inputValue.currentTarget.value.trim())}
+                onInput={inputValue => {
+                    setValue(inputValue.currentTarget.value.trim())
+                    validateTextInput(inputValue.currentTarget.value.trim(), setError);
+                }}
                 className={'border h-14 p-4 ' + (errorType != '' && 'border-red-700')}
                 type="text" 
             />

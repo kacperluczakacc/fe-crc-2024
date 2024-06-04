@@ -1,58 +1,70 @@
 import { MdClose as CloseIcon } from 'react-icons/md'
 
 import { useState } from "react";
-import { Task } from "../App"
-import { RegExp, ROUTE } from '../lib/constans';
-import { FormLabeledInput } from '../components';
+import { ROUTE } from '../lib/constans';
+import { FormError, FormLabeledInput } from '../components';
 import { Link, useHistory } from "react-router-dom";
+import { DatePicker } from '@mui/x-date-pickers';
+import dayjs, { Dayjs } from 'dayjs';
+import { useTypedDispatch } from '../store';
+import { addTask } from '../store/features/tasks/taskSlice';
 
-type AddTaskProps = {
-    setTasks: React.Dispatch<React.SetStateAction<Task[]>>
+enum CustomDate {
+    TODAY,
+    TOMMOROW
 }
 
 export type FormInputType = 'title' | 'author' | 'deadline';
 
-export type FormErrorType = 'empty' | 'too-short' | 'wrong-format' | '';
+export type FormErrorType = 'empty' | 'too-short' | '';
 
-export default function AddTask({setTasks}: AddTaskProps) {
+export function validateTextInput(value : string, errorFunc : React.Dispatch<React.SetStateAction<FormErrorType>>) : boolean {
+    if (value.trim().length == 0) {
+        errorFunc('empty');
+        return true;
+    }
+    if (value.trim().length > 0 && value.trim().length < 3) {
+        errorFunc('too-short');
+        return true;
+    }
+    errorFunc('');
+    return false;
+}
+
+export function validateDateInput(value : Dayjs | null, customDate: CustomDate | null, errorFunc : React.Dispatch<React.SetStateAction<FormErrorType>>) : boolean {
+
+    if (value == null && customDate == null) {
+        errorFunc('empty');
+        return true;
+    }
+    errorFunc('');
+    return false;
+}
+
+export default function AddTask() {
+    const updateStore = useTypedDispatch();
+
     const routerHistory = useHistory();
 
-    const [taskName, setTaskName] = useState('');
-    const [author, setAuthor] = useState('');
-    const [deadline, setDeadline] = useState('');
+    const [customButtonDate, setCustomButtonDate] = useState<CustomDate | null>(null);
+
+    const [taskName, setTaskName] = useState<string>('');
+    const [author, setAuthor] = useState<string>('');
+    const [deadline, setDeadline] = useState<Dayjs | null>(null);
 
     const [taskNameError, setTaskNameError] = useState<FormErrorType>('');
     const [authorError, setAuthorError] = useState<FormErrorType>('');
     const [deadlineError, setDeadlineError] = useState<FormErrorType>('');
 
-    function validateTextInput(value : string, errorFunc : React.Dispatch<React.SetStateAction<FormErrorType>>) : boolean {
-        if (value.trim().length == 0) {
-            errorFunc('empty');
-            return true;
-        }
-        if (value.trim().length < 3) {
-            errorFunc('too-short');
-            return true;
-        }
-        return false;
-    }
-
-    function validateDateInput(value : string, errorFunc : React.Dispatch<React.SetStateAction<FormErrorType>>) : boolean {
-        if (value.trim().length == 0) {
-            errorFunc('empty');
-            return true;
-        }
-        if (!RegExp.deadline.test(value)) {
-            errorFunc('wrong-format');
-            return true;
-        }
-        return false;
+    function handleCustomButtonClick(date: CustomDate) {
+        setCustomButtonDate(prevValue => prevValue == date ? null : date);
+        setDeadline(date != null && date == CustomDate.TODAY ? dayjs() : dayjs().add(1, 'day'));
     }
 
     function handleAddTask() {
         const taskNameTrigger = validateTextInput(taskName, setTaskNameError); 
         const authorTrigger = validateTextInput(author, setAuthorError);
-        const deadlineTrigger = validateDateInput(deadline, setDeadlineError);
+        const deadlineTrigger = validateDateInput(deadline, customButtonDate, setDeadlineError);
 
         // Chciałem tutaj użyć taskNameError, authorError i deadlineError,
         // ale stan w Reacie aktualizuje się najwidoczniej asynchronicznie,
@@ -62,14 +74,12 @@ export default function AddTask({setTasks}: AddTaskProps) {
         if (taskNameTrigger || authorTrigger || deadlineTrigger)
             return;
 
-        setTasks(prevTasks => [
-            ...prevTasks,
-            {
-                title: taskName,
-                author: author,
-                deadline: deadline
-            }
-        ]);
+        updateStore(addTask({
+            title: taskName,
+            author,
+            deadline
+        }));
+
         routerHistory.push(ROUTE.HOME);
     }
 
@@ -97,15 +107,24 @@ export default function AddTask({setTasks}: AddTaskProps) {
                     setError={setAuthorError}
                     setValue={setAuthor}
                 />
-
-                <FormLabeledInput
-                    title={'Deadline'}
-                    type={'deadline'}
-                    errorType={deadlineError}
-                    setError={setDeadlineError}
-                    setValue={setDeadline}
-                />
-
+                
+                <div>
+                    <div className='flex gap-4'>
+                        <button type='button' onClick={() => handleCustomButtonClick(CustomDate.TODAY)} className={`border rounded-lg px-4 py-1 border-slate-300 hover:bg-primary hover:text-white transition ${customButtonDate == CustomDate.TODAY && 'bg-primary text-white'}`}>Today</button>
+                        <button type='button' onClick={() => handleCustomButtonClick(CustomDate.TOMMOROW)} className={`border rounded-lg px-4 py-1 border-slate-300 hover:bg-primary hover:text-white transition ${customButtonDate == CustomDate.TOMMOROW && 'bg-primary text-white'}`}>Tommorow</button>
+                    </div>
+                    <p className='my-4'>or select your date</p>
+                    <DatePicker 
+                    value={customButtonDate == null ? deadline : null} 
+                    onChange={date => setDeadline(date)} 
+                    onOpen={() => {
+                        setCustomButtonDate(null);
+                        setDeadlineError('');
+                    }}
+                    format='DD/MM/YYYY'
+                    className='text-white'/>
+                    { (deadlineError != '') && <FormError type={'deadline'} errorType={deadlineError} /> }
+                </div>
             </form>
         </section>
     )

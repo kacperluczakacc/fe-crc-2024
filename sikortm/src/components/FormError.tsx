@@ -1,6 +1,6 @@
 export default function FormError({type, errorType}: {
     type: 'title' | 'author' | 'deadline',
-    errorType: 'empty' | 'too-short' | 'wrong-format' | ''
+    errorType: 'empty' | 'too-short' | ''
     }){
 
     return (
