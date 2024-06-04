@@ -3,7 +3,6 @@ import {
     MdOutlineCheckBox as CheckedCheckbox,
 } from "react-icons/md";
 
-import { Task as TaskType } from "../App";
 import { useState } from "react";
 
 type TaskProps = {
