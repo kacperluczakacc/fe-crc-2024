@@ -10,32 +10,49 @@ import { useEffect, useState } from "react";
 import { Task as TaskType } from "../App";
 
 export default function TaskList() {
-  const [tasks, setState] = useState<TaskType[]>([]);
+  const [tasks, setTasks] = useState<TaskType[]>([]);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [checkedTaskId, setCheckedTaskId] = useState("");
+  const [checkedTaskIds, setCheckedTaskIds] = useState<string[]>([]); // Zmiana na tablicę zaznaczonych zadań
 
   async function getAllTasks() {
     setIsLoading(true);
 
-    const response = await fetch(Endpoint.TASKS);
-    const tasks = await response.json();
+    try {
+      const response = await fetch(Endpoint.TASKS);
+      const tasks = await response.json();
 
-    if (tasks) {
-      setIsLoading(false);
-      setState(tasks);
-    } else {
+      if (tasks) {
+        setIsLoading(false);
+        setTasks(tasks);
+      } else {
+        setIsLoading(false);
+        setError("Something went wrong. Please try again.");
+      }
+    } catch (error) {
       setIsLoading(false);
       setError("Something went wrong. Please try again.");
     }
   }
 
-  async function deleteTask(id: string) {
-    await fetch(`${Endpoint.TASKS}/${id}`, {
-      method: "DELETE",
-    });
-    setCheckedTaskId('');
-    getAllTasks();
+  async function deleteTasks() {
+    setIsLoading(true);
+
+    try {
+      await Promise.all(
+        checkedTaskIds.map(async (taskId) => {
+          await fetch(`${Endpoint.TASKS}/${taskId}`, {
+            method: "DELETE",
+          });
+        })
+      );
+      setCheckedTaskIds([]);
+      setIsLoading(false);
+      getAllTasks();
+    } catch (error) {
+      setIsLoading(false);
+      setError("Something went wrong. Please try again.");
+    }
   }
 
   useEffect(() => {
@@ -53,8 +70,8 @@ export default function TaskList() {
         </Link>
         <div className="flex gap-4">
           <FilterIcon size={24} />
-          {checkedTaskId !== "" && (
-            <TrashIcon size={24} onClick={() => deleteTask(checkedTaskId)} />
+          {checkedTaskIds.length > 0 && (
+            <TrashIcon size={24} onClick={deleteTasks} />
           )}
         </div>
       </div>
@@ -66,12 +83,13 @@ export default function TaskList() {
       ) : (
         tasks.map((task) => (
           <Task
-            key={task.title.replace(/ /g, "-")}
+            key={task.id}
             title={task.title}
             author={task.author}
             deadline={task.deadline}
             id={task.id}
-            setCheckedTaskId={setCheckedTaskId}
+            setCheckedTaskId={setCheckedTaskIds}
+            checked={checkedTaskIds.includes(task.id)}
           />
         ))
       )}

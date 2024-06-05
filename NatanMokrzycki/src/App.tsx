@@ -42,7 +42,7 @@ async function addNewTask() {
 
 async function updateTask(id: string) {
   const response = await fetch(`http://localhost:3000/tasks/${id}`, {
-    method: "PUT", // aktualizacja danych dla elementu w bazie danych reprezentowanych przed podany ID
+    method: "PUT",
     body: JSON.stringify({
       title: "Updated task no. 4",
     }),

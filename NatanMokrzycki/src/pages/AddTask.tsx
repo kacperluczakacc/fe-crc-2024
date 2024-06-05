@@ -1,53 +1,56 @@
-import { useEffect, useState } from "react";
+import { useEffect, useReducer, ChangeEvent } from "react";
 import { MdClose as CloseIcon } from "react-icons/md";
 import { AddTaskError, ROUTE } from "../lib/constants";
 import { DatePicker } from "@mui/x-date-pickers";
-import dayjs, { Dayjs } from "dayjs";
 import { Link, useHistory } from "react-router-dom";
 import { Endpoint } from "../api/constants";
+import { initialState, reducer } from "../components/taskReducer";
+import { CustomDate } from "../components/taskReducer";
+import dayjs from "dayjs";
+import CustomDateButton from "../components/CustomDateButton";
+import InputField from "../components/InputField";
 
-enum CustomDate {
-  TODAY,
-  TOMORROW,
-}
 export default function AddTask() {
   const history = useHistory();
+  const [state, dispatch] = useReducer(reducer, initialState);
 
-  const [deadline, setDeadline] = useState<Dayjs | null>(null);
-  const [customButtonDate, setCustomButtonDate] = useState<CustomDate | null>(
-    null
-  );
-
-  const [taskName, setTaskName] = useState("");
-  const [author, setAuthor] = useState("");
-
-  const [taskNameError, setTaskNameError] = useState(false);
-  const [deadlineError, setDeadlineError] = useState(false);
-  const [authorError, setAuthorError] = useState(false);
+  const {
+    taskName,
+    author,
+    deadline,
+    customButtonDate,
+    taskNameError,
+    authorError,
+    deadlineError,
+  } = state;
 
   const isTaskNameValid = taskName.length >= 3;
   const isAuthorValid = author.length >= 3;
   const isDeadlineValid = deadline !== null;
 
-  function setErrors() {
-    setTaskNameError(!isTaskNameValid);
-    setAuthorError(!isAuthorValid);
-    setDeadlineError(!isDeadlineValid);
-  }
-
   useEffect(() => {
-    setTaskNameError(taskName.length > 0 && !isTaskNameValid);
-    setAuthorError(author.length > 0 && !isAuthorValid);
+    dispatch({
+      type: "SET_TASK_NAME_ERROR",
+      payload: taskName.length > 0 && !isTaskNameValid,
+    });
+    dispatch({
+      type: "SET_AUTHOR_ERROR",
+      payload: author.length > 0 && !isAuthorValid,
+    });
   }, [taskName, author]);
 
   useEffect(() => {
     if (customButtonDate === null) {
-      setDeadline(null);
+      dispatch({ type: "SET_DEADLINE", payload: null });
     } else {
-      setDeadline(
-        customButtonDate === CustomDate.TODAY ? dayjs() : dayjs().add(1, "day")
-      );
-      setDeadlineError(false);
+      dispatch({
+        type: "SET_DEADLINE",
+        payload:
+          customButtonDate === CustomDate.TODAY
+            ? dayjs()
+            : dayjs().add(1, "day"),
+      });
+      dispatch({ type: "SET_DEADLINE_ERROR", payload: false });
     }
   }, [customButtonDate]);
 
@@ -57,8 +60,8 @@ export default function AddTask() {
       body: JSON.stringify({
         title: taskName,
         author,
-        deadline: deadline?.toString()
-      })
+        deadline: deadline?.toString(),
+      }),
     });
 
     return response;
@@ -70,14 +73,17 @@ export default function AddTask() {
 
       if (response.ok) {
         history.push(ROUTE.HOME);
-      } 
+      }
     } else {
-      setErrors();
+      dispatch({ type: "SET_ERRORS" });
     }
   }
 
   function handleCustomButtonClick(date: CustomDate) {
-    setCustomButtonDate((prevValue) => (prevValue === date ? null : date));
+    dispatch({
+      type: "SET_CUSTOM_BUTTON_DATE",
+      payload: customButtonDate === date ? null : date,
+    });
   }
 
   return (
@@ -92,55 +98,43 @@ export default function AddTask() {
         </button>
       </div>
       <form className="flex flex-col gap-10 my-6 px-5">
-        <div className="flex flex-col relative">
-          <label className="absolute -top-3 left-2 bg-secondary px-2">
-            Task name
-          </label>
-          <input
-            onInput={(input) => setTaskName(input.currentTarget.value)}
-            className="border h-14 p-4"
-            type="text"
-          />
-          {taskNameError && (
-            <p className="text-red-500">{AddTaskError.TASK_NAME}</p>
-          )}
-        </div>
+        <InputField
+          label="Task name"
+          value={taskName}
+          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+            dispatch({
+              type: "SET_TASK_NAME",
+              payload: e.currentTarget.value,
+            })
+          }
+          error={taskNameError ? AddTaskError.TASK_NAME : undefined}
+        />
 
-        <div className="flex flex-col relative">
-          <label className="absolute -top-3 left-2 bg-secondary px-2">
-            Author
-          </label>
-          <input
-            className="border h-14 p-4"
-            type="text"
-            onInput={(input) => setAuthor(input.currentTarget.value)}
-          />
-          {authorError && <p className="text-red-500">{AddTaskError.AUTHOR}</p>}
-        </div>
+        <InputField
+          label="Author"
+          value={author}
+          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+            dispatch({
+              type: "SET_AUTHOR",
+              payload: e.currentTarget.value,
+            })
+          }
+          error={authorError ? AddTaskError.AUTHOR : undefined}
+        />
 
         <div className="flex gap-4">
-          <button
-            type="button"
+          <CustomDateButton
             onClick={() => handleCustomButtonClick(CustomDate.TODAY)}
-            className={`border rounded-lg px-4 py-1 border-slate-300 hover:bg-primary hover:text-white ${
-              customButtonDate === CustomDate.TODAY
-                ? "bg-primary text-white"
-                : ""
-            } `}
+            active={customButtonDate === CustomDate.TODAY}
           >
             Today
-          </button>
-          <button
-            type="button"
+          </CustomDateButton>
+          <CustomDateButton
             onClick={() => handleCustomButtonClick(CustomDate.TOMORROW)}
-            className={`border rounded-lg px-4 py-1 border-slate-300 hover:bg-primary hover:text-white ${
-              customButtonDate === CustomDate.TOMORROW
-                ? "bg-primary text-white"
-                : ""
-            }`}
+            active={customButtonDate === CustomDate.TOMORROW}
           >
             Tomorrow
-          </button>
+          </CustomDateButton>
         </div>
 
         <p>or select your date</p>
@@ -150,16 +144,17 @@ export default function AddTask() {
             className="w-full"
             value={customButtonDate !== null ? null : deadline}
             onChange={(date) => {
-              setDeadline(date);
-              setDeadlineError(false);
+              dispatch({ type: "SET_DEADLINE", payload: date });
+              dispatch({ type: "SET_DEADLINE_ERROR", payload: false });
             }}
-            onOpen={() => setCustomButtonDate(null)}
+            onOpen={() =>
+              dispatch({ type: "SET_CUSTOM_BUTTON_DATE", payload: null })
+            }
             format="DD/MM/YYYY"
           />
           {deadlineError && <p>{AddTaskError.DEADLINE}</p>}
         </div>
       </form>
     </section>
-    // TEMPLATE LITERAL
   );
 }
