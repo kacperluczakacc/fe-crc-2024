@@ -10,10 +10,10 @@ import { useEffect, useState } from "react";
 import { Task as TaskType } from "../App";
 
 export default function TaskList() {
-  const [tasks, setState] = useState<TaskType[]>([]);
+  const [tasks, setTasks] = useState<TaskType[]>([]);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [checkedTaskId, setCheckedTaskId] = useState("");
+  const [checkedTaskIds, setCheckedTaskIds] = useState<string[]>([]);
 
   async function getAllTasks() {
     setIsLoading(true);
@@ -23,24 +23,32 @@ export default function TaskList() {
 
     if (tasks) {
       setIsLoading(false);
-      setState(tasks);
+      setTasks(tasks);
     } else {
       setIsLoading(false);
       setError("Something went wrong. Please try again.");
     }
   }
 
-  async function deleteTask(id: string) {
-    await fetch(`${Endpoint.TASKS}/${id}`, {
-      method: "DELETE",
-    });
-    setCheckedTaskId('');
+  async function deleteTasks(ids: string[]) {
+    for (const id of ids) {
+      await fetch(`${Endpoint.TASKS}/${id}`, {
+        method: "DELETE",
+      });
+    }
+    setCheckedTaskIds([]);
     getAllTasks();
   }
 
   useEffect(() => {
     getAllTasks();
   }, []);
+
+  function toggleTaskId(id: string) {
+    setCheckedTaskIds((prev) =>
+      prev.includes(id) ? prev.filter((taskId) => taskId !== id) : [...prev, id]
+    );
+  }
 
   return (
     <section className="p-4">
@@ -53,8 +61,8 @@ export default function TaskList() {
         </Link>
         <div className="flex gap-4">
           <FilterIcon size={24} />
-          {checkedTaskId !== "" && (
-            <TrashIcon size={24} onClick={() => deleteTask(checkedTaskId)} />
+          {checkedTaskIds.length > 0 && (
+            <TrashIcon size={24} onClick={() => deleteTasks(checkedTaskIds)} />
           )}
         </div>
       </div>
@@ -66,12 +74,13 @@ export default function TaskList() {
       ) : (
         tasks.map((task) => (
           <Task
-            key={task.title.replace(/ /g, "-")}
+            key={task.id}
+            id={task.id}
             title={task.title}
             author={task.author}
             deadline={task.deadline}
-            id={task.id}
-            setCheckedTaskId={setCheckedTaskId}
+            isChecked={checkedTaskIds.includes(task.id)}
+            toggleTaskId={toggleTaskId}
           />
         ))
       )}

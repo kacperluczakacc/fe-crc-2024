@@ -5,6 +5,7 @@ import { DatePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
 import { Link, useHistory } from "react-router-dom";
 import { Endpoint } from "../api/constants";
+import InputField from "../components/InputField";
 
 enum CustomDate {
   TODAY,
@@ -139,41 +140,31 @@ export default function AddTask() {
         </button>
       </div>
       <form className="flex flex-col gap-10 my-6 px-5">
-        <div className="flex flex-col relative">
-          <label className="absolute -top-3 left-2 bg-secondary px-2">
-            Task name
-          </label>
-          <input
-            onInput={(input) =>
-              dispatch({
-                type: "SET_TASK_NAME",
-                payload: input.currentTarget.value,
-              })
-            }
-            className="border h-14 p-4"
-            type="text"
-          />
-          {taskNameError && (
-            <p className="text-red-500">{AddTaskError.TASK_NAME}</p>
-          )}
-        </div>
+        <InputField
+          label="Task name"
+          value={taskName}
+          onChange={(input) =>
+            dispatch({
+              type: "SET_TASK_NAME",
+              payload: input.currentTarget.value,
+            })
+          }
+          error={taskNameError}
+          errorMessage={AddTaskError.TASK_NAME}
+        />
 
-        <div className="flex flex-col relative">
-          <label className="absolute -top-3 left-2 bg-secondary px-2">
-            Author
-          </label>
-          <input
-            className="border h-14 p-4"
-            type="text"
-            onInput={(input) =>
-              dispatch({
-                type: "SET_AUTHOR",
-                payload: input.currentTarget.value,
-              })
-            }
-          />
-          {authorError && <p className="text-red-500">{AddTaskError.AUTHOR}</p>}
-        </div>
+        <InputField
+          label="Author"
+          value={author}
+          onChange={(input) =>
+            dispatch({
+              type: "SET_AUTHOR",
+              payload: input.currentTarget.value,
+            })
+          }
+          error={authorError}
+          errorMessage={AddTaskError.AUTHOR}
+        />
 
         <div className="flex gap-4">
           <button
