@@ -1,0 +1,106 @@
+{
+  "tasks": [
+    {
+      "title": "Lorem ipsum",
+      "author": "Kacper Kowalski",
+      "deadline": "18/09/2024",
+      "priority": "High",
+      "status": "In Progress",
+      "additionalInfo": "Lorem ipsum sit dolor amet, consectetur adipiscing elit. Vivamus lacinia odio vitae vestibulum vestibulum. Cras venenatis euismod malesuada.",
+      "id": "9168"
+    },
+    {
+      "title": "Develop New Feature",
+      "author": "Tomek Nowak",
+      "deadline": "18/09/2025",
+      "priority": "Medium",
+      "status": "Not Started",
+      "additionalInfo": "Detailed requirements are documented in the project wiki. Ensure compatibility with existing modules.",
+      "id": "5c1a"
+    },
+    {
+      "title": "UI Redesign",
+      "author": "Gosia Zajac",
+      "deadline": "19/11/2026",
+      "priority": "Low",
+      "status": "Planning",
+      "additionalInfo": "Focus on improving user experience and incorporating feedback from recent user surveys.",
+      "id": "9629"
+    },
+    {
+      "title": "Database Optimization",
+      "author": "John Smith",
+      "deadline": "15/07/2024",
+      "priority": "High",
+      "status": "In Progress",
+      "additionalInfo": "Improve query performance and reduce load times for the reporting system.",
+      "id": "2b4d"
+    },
+    {
+      "title": "Write Unit Tests",
+      "author": "Jane Doe",
+      "deadline": "01/06/2024",
+      "priority": "Medium",
+      "status": "Not Started",
+      "additionalInfo": "Ensure at least 80% code coverage for the newly developed modules.",
+      "id": "7e3f"
+    },
+    {
+      "title": "Client Meeting Preparation",
+      "author": "Emily Johnson",
+      "deadline": "12/12/2023",
+      "priority": "High",
+      "status": "Completed",
+      "additionalInfo": "Prepare presentation slides and gather all necessary reports for the Q4 review meeting.",
+      "id": "1a9b"
+    },
+    {
+      "title": "Server Maintenance",
+      "author": "Michael Brown",
+      "deadline": "25/03/2024",
+      "priority": "Low",
+      "status": "Scheduled",
+      "additionalInfo": "Routine maintenance and software updates for the company servers.",
+      "id": "3f6c"
+    },
+    {
+      "title": "Marketing Campaign",
+      "author": "Sara Wilson",
+      "deadline": "30/08/2024",
+      "priority": "Medium",
+      "status": "In Progress",
+      "additionalInfo": "Launch the summer marketing campaign focusing on social media engagement and email newsletters.",
+      "id": "4d7e"
+    },
+    {
+      "title": "Employee Onboarding",
+      "author": "David Lee",
+      "deadline": "10/01/2024",
+      "priority": "High",
+      "status": "Completed",
+      "additionalInfo": "Complete the onboarding process for the new hires, including training and documentation.",
+      "id": "8a2f"
+    },
+    {
+      "title": "Security Audit",
+      "author": "Alice Green",
+      "deadline": "22/02/2024",
+      "priority": "High",
+      "status": "Not Started",
+      "additionalInfo": "Conduct a thorough security audit of the company’s IT infrastructure.",
+      "id": "9b0e"
+    },
+    {
+      "id": "ede6",
+      "title": "asdasda",
+      "taskAuthor": "asdasdd",
+      "deadline": "Tue, 18 Jun 2024 22:00:00 GMT"
+    },
+    {
+      "id": "80c2",
+      "title": "asdasdas",
+      "taskAuthor": "sdasdsdadd",
+      "deadline": "Sun, 02 Jun 2024 12:11:02 GMT"
+    }
+  ]
+}

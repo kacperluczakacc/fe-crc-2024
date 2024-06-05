@@ -1,35 +1,52 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+// Komponenty w React.js są funkcjami, które zwracają JEDEN element DOM.
+// Składnią React.js jest JSX.
+// Argumenty przekazywane do komponentów Reactowych nazywamy PROPS
 
-function App() {
-  const [count, setCount] = useState(0)
+import { useState } from "react";
+import Task from "./components/task";
+import TaskList from "./components/TaskList";
+import AddTask from "./components/addTask";
 
-  return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+export type Task = {
+    title: string;
+    author: string;
+    deadline: string;
+}
+
+// "Coming from server"
+const mockTasks: Task[] = [
+    {
+        title: "Task 1",
+        author: "Kacper",
+        deadline: "18/09/2025"
+    },
+    {
+        title: "Task 2",
+        author: "Tomek",
+        deadline: "18/09/2024"
+    },
+    {
+        title: "Task 3",
+        author: "Gosia",
+        deadline: "18/01/2025"
+    }
+];
+
+// Hooks to wbudowane funkcje/narzędzia, które pozwalają nam w prosty sposób manipulować
+// różnymi elementami/cyklami komponentów w React.js
+
+const App = () => {
+    const [tasks, setTasks] = useState(mockTasks);
+
+    return (
+        <main className="p-4">
+            <section className="flex flex-col gap-8">
+                <h1 className="text-4xl font-bold">My tasks</h1>
+                <AddTask setTasks={setTasks} />
+                <TaskList tasks={tasks} />
+            </section>
+        </main>
+    )
 }
 
 export default App

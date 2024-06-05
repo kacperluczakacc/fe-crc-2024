@@ -1,0 +1,34 @@
+{
+  "tasks": [
+    {
+      "id": "1",
+      "title": "Lorem ipsum",
+      "author": "Kacper Kowalski",
+      "deadline": "18/09/2024",
+      "priority": "High",
+      "status": "In Progress",
+      "additionalInfo": "Lorem ipsum sit dolor amet, consectetur adipiscing elit. Vivamus lacinia odio vitae vestibulum vestibulum. Cras venenatis euismod malesuada."
+    },
+    {
+      "id": "3",
+      "title": "UI Redesign",
+      "author": "Gosia Zajac",
+      "deadline": "19/11/2026",
+      "priority": "Low",
+      "status": "Planning",
+      "additionalInfo": "Focus on improving user experience and incorporating feedback from recent user surveys."
+    },
+    {
+      "id": "ac71",
+      "title": "test",
+      "author": "aaa",
+      "deadline": "Thu, 27 Jun 2024 22:00:00 GMT"
+    },
+    {
+      "id": "8aa7",
+      "title": "Task 1",
+      "author": "Patryk",
+      "deadline": "Wed, 05 Jun 2024 14:37:49 GMT"
+    }
+  ]
+}
