@@ -1,59 +1,56 @@
-import { useEffect, useState } from "react";
+import { useEffect, useReducer } from "react";
 
 import { MdClose } from "react-icons/md";
 import { AddTaskError } from "../lib/constants";
 import { DatePicker } from "@mui/x-date-pickers";
-import dayjs, { Dayjs } from "dayjs";
+import dayjs from "dayjs";
 import { Link, useHistory } from "react-router-dom";
 import CustomButton from "../components/reusable/CustomButton";
 import FormField from "../components/reusable/FormField";
-
-enum CustomDate {
-  TODAY,
-  TOMORROW,
-}
+import { CustomDate, initialState, reducer, actionTypes } from "../helpers/taskReducer";
 
 export default function AddTask() {
   const history = useHistory();
-  const [deadline, setDeadline] = useState<Dayjs | null>(null);
+  const [state, dispatch] = useReducer(reducer, initialState);
 
-  const [customButtonDate, setCustomButtonDate] = useState<CustomDate | null>(null);
-  const [author, setAuthor] = useState("");
-  const [taskName, setTaskName] = useState<string>("");
-  const [taskNameError, setTaskNameError] = useState(false);
-  const [deadlineError, setDeadlineError] = useState(false);
-  const [authorError, setAuthorError] = useState(false);
-
-  const isTaskNameValid = taskName.length >= 3;
-  const isAuthorValid = author.length >= 3;
-  const isDeadlineValid = deadline !== null;
+  const isTaskNameValid = state.taskName.length >= 3;
+  const isAuthorValid = state.author.length >= 3;
+  const isDeadlineValid = state.deadline !== null;
 
   function setErrors() {
-    setTaskNameError(!isTaskNameValid);
-    setAuthorError(!isAuthorValid);
-    setDeadlineError(!isDeadlineValid);
+    dispatch({ type: actionTypes.SET_TASK_NAME_ERROR, payload: !isTaskNameValid });
+    dispatch({ type: actionTypes.SET_AUTHOR_ERROR, payload: !isAuthorValid });
+    dispatch({ type: actionTypes.SET_DEADLINE_ERROR, payload: !isDeadlineValid });
   }
-  useEffect(() => {
-    setTaskNameError(taskName.length > 0 && !isTaskNameValid);
-    setAuthorError(author.length > 0 && !isAuthorValid);
-  }, [taskName, author]);
 
   useEffect(() => {
-    if (customButtonDate === null) {
-      setDeadline(null);
+    dispatch({
+      type: actionTypes.SET_TASK_NAME_ERROR,
+      payload: state.taskName.length > 0 && !isTaskNameValid,
+    });
+    dispatch({
+      type: actionTypes.SET_AUTHOR_ERROR,
+      payload: state.author.length > 0 && !isAuthorValid,
+    });
+  }, [state.taskName, state.author]);
+  useEffect(() => {
+    if (state.customButtonDate === null) {
+      dispatch({ type: actionTypes.SET_DEADLINE, payload: null });
     } else {
-      setDeadline(customButtonDate === CustomDate.TODAY ? dayjs() : dayjs().add(1, "day"));
-      setDeadlineError(false);
+      const newDeadline =
+        state.customButtonDate === CustomDate.TODAY ? dayjs() : dayjs().add(1, "day");
+      dispatch({ type: actionTypes.SET_DEADLINE, payload: newDeadline });
+      dispatch({ type: actionTypes.SET_DEADLINE_ERROR, payload: false });
     }
-  }, [customButtonDate]);
+  }, [state.customButtonDate]);
 
   async function addNewTaskToServer() {
     const response = await fetch("http://localhost:3000/tasks", {
       method: "POST",
       body: JSON.stringify({
-        title: taskName,
-        author,
-        deadline: deadline?.toString(),
+        title: state.taskName,
+        author: state.author,
+        deadline: state.deadline?.toString(),
       }),
     });
 
@@ -72,8 +69,12 @@ export default function AddTask() {
     }
   }
   function handleCustomButtonClick(date: CustomDate) {
-    setCustomButtonDate((prevValue) => (prevValue === date ? null : date));
+    dispatch({
+      type: actionTypes.SET_CUSTOM_BUTTON_DATE,
+      payload: state.customButtonDate === date ? null : date,
+    });
   }
+
   return (
     <section>
       <div className="flex justify-between items-center p-4">
@@ -89,26 +90,28 @@ export default function AddTask() {
       <form className="flex flex-col gap-10 my-6 px-5">
         <FormField
           label="Task name"
-          value={taskName}
-          onChange={(e) => setTaskName(e.target.value)}
-          error={taskNameError && AddTaskError.TASK_NAME}
+          value={state.taskName}
+          onChange={(e) => dispatch({ type: actionTypes.SET_TASK_NAME, payload: e.target.value })}
+          error={state.taskNameError && AddTaskError.TASK_NAME}
+          id={""}
         />
         <FormField
           label="Author"
-          value={author}
-          onChange={(e) => setAuthor(e.target.value)}
-          error={authorError && AddTaskError.AUTHOR}
+          value={state.author}
+          onChange={(e) => dispatch({ type: actionTypes.SET_AUTHOR, payload: e.target.value })}
+          error={state.authorError && AddTaskError.AUTHOR}
+          id={""}
         />
 
         <div>
           <CustomButton
-            isActive={customButtonDate === CustomDate.TODAY}
+            isActive={state.customButtonDate === CustomDate.TODAY}
             onClick={() => handleCustomButtonClick(CustomDate.TODAY)}
           >
             Today
           </CustomButton>
           <CustomButton
-            isActive={customButtonDate === CustomDate.TOMORROW}
+            isActive={state.customButtonDate === CustomDate.TOMORROW}
             onClick={() => handleCustomButtonClick(CustomDate.TOMORROW)}
           >
             Tomorrow
@@ -116,14 +119,12 @@ export default function AddTask() {
         </div>
         <p>or select your date</p>
         <DatePicker
-          value={customButtonDate !== null ? null : deadline}
-          onChange={(date) => {
-            setDeadline(date);
-          }}
-          onOpen={() => setCustomButtonDate(null)}
+          value={state.customButtonDate !== null ? null : state.deadline}
+          onChange={(date) => dispatch({ type: actionTypes.SET_DEADLINE, payload: date })}
+          onOpen={() => dispatch({ type: actionTypes.SET_CUSTOM_BUTTON_DATE, payload: null })}
           format="DD/MM/YYYY"
         />
-        {deadlineError && <p>{AddTaskError.DEADLINE}</p>}
+        {state.deadlineError && <p>{AddTaskError.DEADLINE}</p>}
       </form>
     </section>
   );
