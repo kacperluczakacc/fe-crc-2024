@@ -6,6 +6,8 @@ import dayjs, { Dayjs } from "dayjs";
 import { Link, useHistory } from "react-router-dom";
 import { Endpoint } from "../api/constants";
 
+//Zmiana z usestate'ow na usereducera ponizej
+
 enum CustomDate {
   TODAY,
   TOMORROW,
