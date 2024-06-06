@@ -25,20 +25,19 @@ async function addNewTask() {
     method: "POST",
     body: JSON.stringify({
       title: "New task no. 4",
-      author: "Kacper",
-      deadline: "19/09/2025",
+      author: "Michal",
+      deadline: "19/05/2024",
     }),
   });
 }
 
 async function updateTask(id: string) {
   const response = await fetch(`http://localhost:3000/tasks/${id}`, {
-    method: "PUT", // aktualizacja danych dla elementu w bazie danych reprezentowanych przed podany ID
-    body: JSON.stringify({
-      title: "Updated task no. 4",
-    }),
-  });
-  console.log(response);
+    method: "PUT", 
+    body: JSON.stringify({ id: id })
+        })
+        const data = await response.json()
+        console.log(data);
 }
 
 const App = () => {

@@ -2,6 +2,7 @@ import {
     MdOutlineCheckBoxOutlineBlank as EmptyCheckbox,
     MdOutlineCheckBox as CheckedCheckbox,
 } from "react-icons/md";
+import React from 'react';
 
 import { useState } from "react";
 
@@ -12,6 +13,7 @@ type TaskProps = {
     id: string;
     setCheckedTaskId: React.Dispatch<React.SetStateAction<string>>;
 };
+
 
 export default function Task({
     title,

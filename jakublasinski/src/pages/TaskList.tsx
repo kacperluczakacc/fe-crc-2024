@@ -6,10 +6,9 @@ import { IoMdAdd } from "react-icons/io";
 import { MdFilterList } from "react-icons/md";
 import { IoMdTrash as TrashIcon } from 'react-icons/io';
 
-
 import { Endpoint } from "../api/constants";
 import { useEffect, useState } from "react";
-import { TaskType } from '../App';
+import { Task as TaskType } from '../App';
 
 export default function TaskList() {
     const [tasks, setState] = useState<TaskType[]>([]);
