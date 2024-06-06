@@ -14,6 +14,7 @@ module.exports = {
       'warn',
       { allowConstantExport: true },
     ],
-    'react/props-types': 0
+    'react/props-types': 0,
+    "@typescript-eslint/no-explicit-any": ["off"]
   },
 }
