@@ -1,1 +1,0 @@
-# To jest README.md od Kamila Kurek
