@@ -95,7 +95,6 @@ export default function AddTask() {
       if (response.ok) 
         history.push(ROUTE.HOME)
     } else {
-      console.log('save', isAuthorValid);
       dispatch({ type: 'set_taskName_error', payload: !isTaskNameValid })
       dispatch({ type: 'set_author_error', payload: !isAuthorValid })
       dispatch({ type: 'set_deadline_error', payload: !isDeadlineValid })
