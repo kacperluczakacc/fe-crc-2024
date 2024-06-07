@@ -6,8 +6,8 @@ import { DatePicker } from "@mui/x-date-pickers";
 import dayjs, { Dayjs } from "dayjs";
 import { Link, useHistory } from "react-router-dom";
 import { EndPoint } from "../api/constants";
-
-enum CustomDate { TODAY, TOMORROW }
+import { CustomDate } from "../lib/constants";
+import Button from "../components/Button";
 
 type addTaskState = { 
   taskName: { name: string, error: boolean, isValid: boolean },
@@ -138,36 +138,25 @@ export default function AddTask() {
         </div>
 
         <div className="flex gap-4">
-          <button
-            onClick={() => 
-              dispatch({ 
+          <Button 
+              text="Today" 
+              customButtonDate={customButtonDate} 
+              customDateCurrent={CustomDate.TODAY}
+              dispatch={() => dispatch({ 
                 type: 'set_customButtonDate', 
                 payload: customButtonDate === CustomDate.TODAY ? null : CustomDate.TODAY
-              })
-            }
-            className={`
-              border rounded-lg px-4 py-1 border-slate-300 hover:bg-primary hover:text-white
-              ${customButtonDate === CustomDate.TODAY ? "bg-primary text-white" : ""}
-            `}
-            type="button"
-          >
-            Today
-          </button>
-          <button
-            onClick={() =>
+            })}
+          />
+          <Button 
+            text="Tomorrow"
+            customButtonDate={customButtonDate}
+            customDateCurrent={CustomDate.TOMORROW}
+            dispatch={() =>
               dispatch({ 
                 type: 'set_customButtonDate', 
                 payload: customButtonDate === CustomDate.TOMORROW ? null : CustomDate.TOMORROW
-              })
-            }
-            className={`
-              border rounded-lg px-4 py-1 border-slate-300 hover:bg-primary hover:text-white 
-              ${customButtonDate === CustomDate.TOMORROW ? "bg-primary text-white" : ""}
-            `}
-            type="button"
-          >
-            Tomorrow
-          </button>
+            })}
+          />
         </div>
 
         <p>or select your date</p>
