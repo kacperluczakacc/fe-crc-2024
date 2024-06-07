@@ -9,10 +9,10 @@ type TaskProps = {
     author: string,
     deadline: string,
     id: string,
-    setCheckedTaskId: React.Dispatch<React.SetStateAction<string>>
+    setCheckedTasksId: React.Dispatch<React.SetStateAction<string[]>>
 }
 
-export default function Task({ title, author, deadline, id, setCheckedTaskId }: TaskProps) {    
+export default function Task({ title, author, deadline, id, setCheckedTasksId }: TaskProps) {    
     const [checked, dispatch] = useReducer(
         (state: { isChecked: boolean; }, action: { type: "toggle" }) => {
             return action.type === 'toggle' 
@@ -22,7 +22,14 @@ export default function Task({ title, author, deadline, id, setCheckedTaskId }: 
     
     return (
         <div
-            onClick={() => { dispatch({ type: "toggle" });  setCheckedTaskId((prevValue) => prevValue === id ? '' : id); }} 
+            onClick={() => { 
+                dispatch({ type: "toggle" });
+                setCheckedTasksId(prevValue => {
+                    return prevValue.includes(id) 
+                        ? prevValue.filter(taskId => taskId !== id) 
+                        : [...prevValue, id]
+                })
+            }} 
             className={`
                 ${checked.isChecked 
                     ? "bg-thirdly rounded-2xl shadow-md active:bg-primary my-4 p-4 flex justify-between items-center"

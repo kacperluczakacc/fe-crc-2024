@@ -13,7 +13,8 @@ export default function TaskList() {
   const [tasks, setState] = useState<TaskType[]>([])
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [checkedTaskId, setCheckedTaskId] = useState('')
+
+  const [checkedTasksId, setCheckedTasksId] = useState<string[]>([]);
 
   async function getAllTasks() {
     setIsLoading(true)
@@ -27,7 +28,7 @@ export default function TaskList() {
 
   async function deleteTask(id: string) {
     await fetch(`${EndPoint.TASKS}/${id}`, { method: "DELETE" })
-    setCheckedTaskId('')
+    setCheckedTasksId([])
     getAllTasks()
   }
 
@@ -44,7 +45,12 @@ export default function TaskList() {
         </Link>
         <div className="flex gap-4">
           <FilterIcon size={24} />
-          {checkedTaskId !== '' && <TrashIcon size={24} onClick={() => deleteTask(checkedTaskId)} />}
+          {checkedTasksId.length > 0 && (
+						<TrashIcon
+							onClick={() => { checkedTasksId.forEach(taskId => deleteTask(taskId)) }}
+							size={24}
+						/>
+					)}
         </div>
       </div>
 
@@ -60,7 +66,7 @@ export default function TaskList() {
             author={task.author}
             deadline={task.deadline}
             id={task.id}
-            setCheckedTaskId={setCheckedTaskId}
+            setCheckedTasksId={setCheckedTasksId}
           />
         ))
       )}
