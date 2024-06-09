@@ -1,13 +1,10 @@
 import { MdClose as CloseIcon } from 'react-icons/md'
-
-import { useState } from "react";
+import { useReducer } from "react";
 import { ROUTE } from '../lib/constants';
 import { FormError, FormLabeledInput } from '../components';
 import { Link, useHistory } from "react-router-dom";
 import { DatePicker } from '@mui/x-date-pickers';
 import dayjs, { Dayjs } from 'dayjs';
-// import { useTypedDispatch } from '../store';
-// import { addTask } from '../store/features/tasks/taskSlice';
 import { Endpoint } from '../api/constants';
 
 enum CustomDate {
@@ -19,7 +16,7 @@ export type FormInputType = 'title' | 'author' | 'deadline';
 
 export type FormErrorType = 'empty' | 'too-short' | '';
 
-export function validateTextInput(value : string, errorFunc : React.Dispatch<React.SetStateAction<FormErrorType>>) : boolean {
+export function validateTextInput(value: string, errorFunc: React.Dispatch<React.SetStateAction<FormErrorType>>): boolean {
     if (value.trim().length == 0) {
         errorFunc('empty');
         return true;
@@ -32,8 +29,7 @@ export function validateTextInput(value : string, errorFunc : React.Dispatch<Rea
     return false;
 }
 
-export function validateDateInput(value : Dayjs | null, customDate: CustomDate | null, errorFunc : React.Dispatch<React.SetStateAction<FormErrorType>>) : boolean {
-
+export function validateDateInput(value: Dayjs | null, customDate: CustomDate | null, errorFunc: React.Dispatch<React.SetStateAction<FormErrorType>>): boolean {
     if (value == null && customDate == null) {
         errorFunc('empty');
         return true;
@@ -42,61 +38,86 @@ export function validateDateInput(value : Dayjs | null, customDate: CustomDate |
     return false;
 }
 
+type State = {
+    customButtonDate: CustomDate | null;
+    taskName: string;
+    author: string;
+    deadline: Dayjs | null;
+    taskNameError: FormErrorType;
+    authorError: FormErrorType;
+    deadlineError: FormErrorType;
+};
+
+type Action =
+    | { type: 'SET_CUSTOM_BUTTON_DATE'; payload: CustomDate | null }
+    | { type: 'SET_TASK_NAME'; payload: string }
+    | { type: 'SET_AUTHOR'; payload: string }
+    | { type: 'SET_DEADLINE'; payload: Dayjs | null }
+    | { type: 'SET_TASK_NAME_ERROR'; payload: FormErrorType }
+    | { type: 'SET_AUTHOR_ERROR'; payload: FormErrorType }
+    | { type: 'SET_DEADLINE_ERROR'; payload: FormErrorType };
+
+const initialState: State = {
+    customButtonDate: null,
+    taskName: '',
+    author: '',
+    deadline: null,
+    taskNameError: '',
+    authorError: '',
+    deadlineError: ''
+};
+
+function reducer(state: State, action: Action): State {
+    switch (action.type) {
+        case 'SET_CUSTOM_BUTTON_DATE':
+            return { ...state, customButtonDate: action.payload };
+        case 'SET_TASK_NAME':
+            return { ...state, taskName: action.payload };
+        case 'SET_AUTHOR':
+            return { ...state, author: action.payload };
+        case 'SET_DEADLINE':
+            return { ...state, deadline: action.payload };
+        case 'SET_TASK_NAME_ERROR':
+            return { ...state, taskNameError: action.payload };
+        case 'SET_AUTHOR_ERROR':
+            return { ...state, authorError: action.payload };
+        case 'SET_DEADLINE_ERROR':
+            return { ...state, deadlineError: action.payload };
+        default:
+            return state;
+    }
+}
+
 export default function AddTask() {
-    // const updateStore = useTypedDispatch();
-
     const routerHistory = useHistory();
-
-    const [customButtonDate, setCustomButtonDate] = useState<CustomDate | null>(null);
-
-    const [taskName, setTaskName] = useState<string>('');
-    const [author, setAuthor] = useState<string>('');
-    const [deadline, setDeadline] = useState<Dayjs | null>(null);
-
-    const [taskNameError, setTaskNameError] = useState<FormErrorType>('');
-    const [authorError, setAuthorError] = useState<FormErrorType>('');
-    const [deadlineError, setDeadlineError] = useState<FormErrorType>('');
+    const [state, dispatch] = useReducer(reducer, initialState);
 
     function handleCustomButtonClick(date: CustomDate) {
-        setCustomButtonDate(prevValue => prevValue == date ? null : date);
-        setDeadline(date != null && date == CustomDate.TODAY ? dayjs() : dayjs().add(1, 'day'));
+        dispatch({ type: 'SET_CUSTOM_BUTTON_DATE', payload: state.customButtonDate == date ? null : date });
+        dispatch({ type: 'SET_DEADLINE', payload: date != null && date == CustomDate.TODAY ? dayjs() : dayjs().add(1, 'day') });
     }
 
     const addNewTaskToServer = async () => {
         const response = await fetch(Endpoint.TASKS, {
             method: 'POST',
             body: JSON.stringify({
-                title: taskName,
-                author,
-                deadline: deadline?.toString()
+                title: state.taskName,
+                author: state.author,
+                deadline: state.deadline?.toString()
             })
         });
         return response;
     }
 
     async function handleAddTask() {
-        const taskNameTrigger = validateTextInput(taskName, setTaskNameError); 
-        const authorTrigger = validateTextInput(author, setAuthorError);
-        const deadlineTrigger = validateDateInput(deadline, customButtonDate, setDeadlineError);
-
-        // Chciałem tutaj użyć taskNameError, authorError i deadlineError,
-        // ale stan w Reacie aktualizuje się najwidoczniej asynchronicznie,
-        // więc muszę to zrobić przypisując zwracaną wartość do stałych.
-        // Od razu tu moje pytanie czy można to rozwiązać inaczej tak, aby
-        // nie tworzyć dodatkowych zmiennych/stałych?
+        const taskNameTrigger = validateTextInput(state.taskName, error => dispatch({ type: 'SET_TASK_NAME_ERROR', payload: error }));
+        const authorTrigger = validateTextInput(state.author, error => dispatch({ type: 'SET_AUTHOR_ERROR', payload: error }));
+        const deadlineTrigger = validateDateInput(state.deadline, state.customButtonDate, error => dispatch({ type: 'SET_DEADLINE_ERROR', payload: error }));
         if (taskNameTrigger || authorTrigger || deadlineTrigger)
             return;
-
-        // updateStore(addTask({
-        //     title: taskName,
-        //     author,
-        //     deadline
-        // }));
-
         const response = await addNewTaskToServer();
         if (response.ok)
             routerHistory.push(ROUTE.HOME);
-
     }
 
     return (
@@ -107,41 +128,38 @@ export default function AddTask() {
                 <button onClick={handleAddTask} className='text-primary font-bold'>Save</button>
             </div>
             <form className="flex flex-col gap-10 my-4 px-5">
-
                 <FormLabeledInput
                     title={'Title'}
                     type={'title'}
-                    errorType={taskNameError}
-                    setError={setTaskNameError}
-                    setValue={setTaskName}
+                    errorType={state.taskNameError}
+                    setError={error => dispatch({ type: 'SET_TASK_NAME_ERROR', payload: error })}
+                    setValue={value => dispatch({ type: 'SET_TASK_NAME', payload: value })}
                 />
-
                 <FormLabeledInput
                     title={'Author'}
                     type={'author'}
-                    errorType={authorError}
-                    setError={setAuthorError}
-                    setValue={setAuthor}
+                    errorType={state.authorError}
+                    setError={error => dispatch({ type: 'SET_AUTHOR_ERROR', payload: error })}
+                    setValue={value => dispatch({ type: 'SET_AUTHOR', payload: value })}
                 />
-                
                 <div>
                     <div className='flex gap-4'>
-                        <button type='button' onClick={() => handleCustomButtonClick(CustomDate.TODAY)} className={`border rounded-lg px-4 py-1 border-slate-300 hover:bg-primary hover:text-white transition ${customButtonDate == CustomDate.TODAY && 'bg-primary text-white'}`}>Today</button>
-                        <button type='button' onClick={() => handleCustomButtonClick(CustomDate.TOMMOROW)} className={`border rounded-lg px-4 py-1 border-slate-300 hover:bg-primary hover:text-white transition ${customButtonDate == CustomDate.TOMMOROW && 'bg-primary text-white'}`}>Tommorow</button>
+                        <button type='button' onClick={() => handleCustomButtonClick(CustomDate.TODAY)} className={`border rounded-lg px-4 py-1 border-slate-300 hover:bg-primary hover:text-white transition ${state.customButtonDate == CustomDate.TODAY && 'bg-primary text-white'}`}>Today</button>
+                        <button type='button' onClick={() => handleCustomButtonClick(CustomDate.TOMMOROW)} className={`border rounded-lg px-4 py-1 border-slate-300 hover:bg-primary hover:text-white transition ${state.customButtonDate == CustomDate.TOMMOROW && 'bg-primary text-white'}`}>Tommorow</button>
                     </div>
                     <p className='my-4'>or select your date</p>
-                    <DatePicker 
-                    value={customButtonDate == null ? deadline : null} 
-                    onChange={date => setDeadline(date)} 
-                    onOpen={() => {
-                        setCustomButtonDate(null);
-                        setDeadlineError('');
-                    }}
-                    format='DD/MM/YYYY'
-                    className='text-white'/>
-                    { (deadlineError != '') && <FormError type={'deadline'} errorType={deadlineError} /> }
+                    <DatePicker
+                        value={state.customButtonDate == null ? state.deadline : null}
+                        onChange={date => dispatch({ type: 'SET_DEADLINE', payload: date })}
+                        onOpen={() => {
+                            dispatch({ type: 'SET_CUSTOM_BUTTON_DATE', payload: null });
+                            dispatch({ type: 'SET_DEADLINE_ERROR', payload: '' });
+                        }}
+                        format='DD/MM/YYYY'
+                        className='text-white' />
+                    {state.deadlineError != '' && <FormError type={'deadline'} errorType={state.deadlineError} />}
                 </div>
             </form>
         </section>
-    )
+    );
 }
