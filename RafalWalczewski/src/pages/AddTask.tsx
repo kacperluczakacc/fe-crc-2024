@@ -1,79 +1,93 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { MdClose as CloseIcon } from "react-icons/md";
-import { Task } from "../App";
-import { RegExp } from "../lib/constants";
+import { AddTaskError, ROUTE } from "../lib/constants";
 import { DatePicker } from "@mui/x-date-pickers";
+import dayjs, { Dayjs } from "dayjs";
+import { Link, useHistory } from "react-router-dom";
+import { Endpoint } from "../api/constants";
 
-type AddTaskProps = {
-  setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
-};
+enum CustomDate {
+  TODAY,
+  TOMORROW,
+}
+export default function AddTask() {
+  const history = useHistory();
 
-export default function AddTask({ setTasks }: AddTaskProps) {
+  const [deadline, setDeadline] = useState<Dayjs | null>(null);
+  const [customButtonDate, setCustomButtonDate] = useState<CustomDate | null>(
+    null
+  );
+
   const [taskName, setTaskName] = useState("");
-  const [deadline, setDeadline] = useState("");
   const [author, setAuthor] = useState("");
 
   const [taskNameError, setTaskNameError] = useState(false);
   const [deadlineError, setDeadlineError] = useState(false);
   const [authorError, setAuthorError] = useState(false);
-  // ZAD. DOMOWE -> zrobić walidację tekstu dla Author
 
-  function hideTaskError() {
-    setTaskNameError(false);
-  }
+  const isTaskNameValid = taskName.length >= 3;
+  const isAuthorValid = author.length >= 3;
+  const isDeadlineValid = deadline !== null;
 
-  function hideDeadlineError() {
-    setDeadlineError(false);
-  }
-
-  function hideAuthorError() {
-    setAuthorError(false);
+  function setErrors() {
+    setTaskNameError(!isTaskNameValid);
+    setAuthorError(!isAuthorValid);
+    setDeadlineError(!isDeadlineValid);
   }
 
   useEffect(() => {
-    setTaskNameError(taskName.length === 1);
-    setAuthorError(author.length === 1);
-    // setAuthorError(author[0] !== author[0].toUpperCase());
-    setDeadlineError(RegExp.deadline.test(deadline));
-  }, [taskName, deadline, author]);
+    setTaskNameError(taskName.length > 0 && !isTaskNameValid);
+    setAuthorError(author.length > 0 && !isAuthorValid);
+  }, [taskName, author]);
 
-  function handleAddTask() {
-    /*       setTasks((prevTasks) => [
-        ...prevTasks,
-        {
-          title: taskNameRef.current!.value,
-          author: authorRef.current!.value,
-          deadline: deadlineRef.current!.value,
-        },
-      ]); */
+  useEffect(() => {
+    if (customButtonDate === null) {
+      setDeadline(null);
+    } else {
+      setDeadline(
+        customButtonDate === CustomDate.TODAY ? dayjs() : dayjs().add(1, "day")
+      );
+      setDeadlineError(false);
+    }
+  }, [customButtonDate]);
 
-    async function handleSaveClick() {
-      if (isTaskNameValid && isAuthorValid && isDeadlineValid) {
-        const response = await addNewTaskToServer();
-      
-        if (response.ok){
-          
-        }} 
-    };
+  async function addNewTaskToServer() {
+    const response = await fetch(Endpoint.TASKS, {
+      method: "POST",
+      body: JSON.stringify({
+        title: taskName,
+        author,
+        deadline: deadline?.toString()
+      })
+    });
 
-    async function addNewTaskToServer() {
-      const response = await fetch(Endpoint.TASKS, {
-        method: "POST",
-        body: JSON.stringify({
-          title: taskName,
-          author,
-          deadline: deadline?.toString()
-        })
-      });
-      return response;
+    return response;
+  }
+
+  async function handleSaveClick() {
+    if (isTaskNameValid && isAuthorValid && isDeadlineValid) {
+      const response = await addNewTaskToServer();
+
+      if (response.ok) {
+        history.push(ROUTE.HOME);
+      } 
+    } else {
+      setErrors();
+    }
+  }
+
+  function handleCustomButtonClick(date: CustomDate) {
+    setCustomButtonDate((prevValue) => (prevValue === date ? null : date));
   }
 
   return (
     <section>
       <div className="flex justify-between items-center p-4">
-        <CloseIcon size={24} />
+        <Link to={ROUTE.HOME}>
+          <CloseIcon size={24} />
+        </Link>
         <h1 className="text-xl">Create new task</h1>
-        <button onClick={handleAddTask} className="text-primary font-bold">
+        <button className="text-primary font-bold" onClick={handleSaveClick}>
           Save
         </button>
       </div>
@@ -83,13 +97,12 @@ export default function AddTask({ setTasks }: AddTaskProps) {
             Task name
           </label>
           <input
-            onFocus={hideTaskError}
             onInput={(input) => setTaskName(input.currentTarget.value)}
             className="border h-14 p-4"
             type="text"
           />
           {taskNameError && (
-            <p className="text-red-600">Task name is empty. Please add text.</p>
+            <p className="text-red-500">{AddTaskError.TASK_NAME}</p>
           )}
         </div>
 
@@ -98,57 +111,55 @@ export default function AddTask({ setTasks }: AddTaskProps) {
             Author
           </label>
           <input
-            onFocus={hideAuthorError}
-            onInput={(input) => setAuthor(input.currentTarget.value)}
             className="border h-14 p-4"
             type="text"
+            onInput={(input) => setAuthor(input.currentTarget.value)}
           />
-          {authorError && (
-            <p className="text-red-600">
-              Author name must be at least 2 letters long and start with a
-              capital letter. Please add text.
-            </p>
-          )}
+          {authorError && <p className="text-red-500">{AddTaskError.AUTHOR}</p>}
         </div>
 
-        <div className="flex flex-col relative">
-          <label className="absolute -top-3 left-2 bg-secondary px-2">
-            Deadline
-          </label>
-          <input
-            onFocus={hideDeadlineError}
-            onInput={(input) => setDeadline(input.currentTarget.value)}
-            className="border h-14 p-4"
-            type="text"
-          />
-          {deadlineError && (
-            <p>Deadline is in a wrong format (DD/MM/YYYY). Please correct.</p>
-          )}
+        <div className="flex gap-4">
+          <button
+            type="button"
+            onClick={() => handleCustomButtonClick(CustomDate.TODAY)}
+            className={`border rounded-lg px-4 py-1 border-slate-300 hover:bg-primary hover:text-white ${
+              customButtonDate === CustomDate.TODAY
+                ? "bg-primary text-white"
+                : ""
+            } `}
+          >
+            Today
+          </button>
+          <button
+            type="button"
+            onClick={() => handleCustomButtonClick(CustomDate.TOMORROW)}
+            className={`border rounded-lg px-4 py-1 border-slate-300 hover:bg-primary hover:text-white ${
+              customButtonDate === CustomDate.TOMORROW
+                ? "bg-primary text-white"
+                : ""
+            }`}
+          >
+            Tomorrow
+          </button>
         </div>
+
+        <p>or select your date</p>
+
         <div>
-          <button>Today</button>
-          <button>Tomorrow</button>
+          <DatePicker
+            className="w-full"
+            value={customButtonDate !== null ? null : deadline}
+            onChange={(date) => {
+              setDeadline(date);
+              setDeadlineError(false);
+            }}
+            onOpen={() => setCustomButtonDate(null)}
+            format="DD/MM/YYYY"
+          />
+          {deadlineError && <p>{AddTaskError.DEADLINE}</p>}
         </div>
-        <p>select your date</p>
-        <DatePicker format="DD/MM/YYYY" />
       </form>
     </section>
+    // TEMPLATE LITERAL
   );
-}
-
-{
-  /* <button
-onClick={handleAddTask}
-type="button" className="border border-solid">
-ADD TASK
-</button>
-<form className="flex flex-col gap-1 my-2">
-<label>Task name:</label>
-<input ref={taskNameRef}
-    className="border" type="text" />
-<label>Author:</label>
-<input ref={authorRef} className="border" type="text" />
-<label>Deadline:</label>
-<input ref={deadlineRef} className="border" type="text" />
-</form> */
 }
