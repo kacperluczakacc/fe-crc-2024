@@ -1,22 +1,42 @@
-import { MdOutlineCheckBoxOutlineBlank as EmptyCheckbox,  MdOutlineCheckBox as CheckedCheckBox } from "react-icons/md";
-import { Task as TaskType } from "../App";
+import {
+    MdOutlineCheckBoxOutlineBlank as EmptyCheckbox,
+    MdOutlineCheckBox as CheckedCheckbox,
+} from "react-icons/md";
+  
 import { useState } from "react";
 
-export default function Task({ title, author, deadline }: TaskType) {
-    const [isChecked, setIsChekced] = useState(false);
-    
+type TaskProps = {
+    title: string,
+    author: string,
+    deadline: string,
+    id: string,
+    setCheckedTaskId: React.Dispatch<React.SetStateAction<string>>
+}
+
+export default function Task({ title, author, deadline, id, setCheckedTaskId }: TaskProps) {
+    const [isChecked, setIsChecked] = useState(false);
+
     function toggleCheck() {
-        setIsChekced(prevState => !prevState)
+        setCheckedTaskId((prevValue) => prevValue === id ? '' : id);
+        setIsChecked(prevState => !prevState);
     }
 
     return (
-        <div onClick={toggleCheck} className="bg-secondary rounded-2xl shadow-2md active:bg-primary my-4 p-4 flex justify-between">
+        <div
+            onClick={toggleCheck} 
+            className={`
+                ${isChecked 
+                    ? "bg-thirdly rounded-2xl shadow-md active:bg-primary my-4 p-4 flex justify-between items-center"
+                    : "bg-secondary rounded-2xl shadow-md active:bg-primary my-4 p-4 flex justify-between items-center"
+                }
+            `}
+        >    
             <div>
                 <p>{deadline}</p>
                 <p className="text-xl font-bold">{title}</p>
                 <p className="text-slate-600">{author}</p>
             </div>
-            {isChecked ? <CheckedCheckBox size={24} /> : <EmptyCheckbox size={24} />}
+            {isChecked ? <CheckedCheckbox size={24}/> : <EmptyCheckbox size={24}/>}
         </div>
     )
 }

@@ -3,26 +3,19 @@ import {
   MdOutlineCheckBox as CheckedCheckbox,
 } from "react-icons/md";
 
-import { useEffect, useState } from "react";
-
 type TaskProps = {
     title: string;
     author: string;
     deadline: string;
     id: string;
-    setCheckedTaskId: React.Dispatch<React.SetStateAction<string>>;
+    isChecked: boolean;
+    setCheckedTaskId: (id: string) => void;
 };
 
-function Task({ title, author, deadline, id, setCheckedTaskId }: TaskProps) {
-    const [isChecked, setIsChecked] = useState(false);
-
-    useEffect(() => {
-        console.log("isChecked state updated to:", isChecked);
-    }, [isChecked]);
-
+function Task({ title, author, deadline, id, isChecked, setCheckedTaskId }: TaskProps) {
+    
     function toggleCheck() {
-        setCheckedTaskId((prevValue) => (prevValue === id ? "" : id));
-        setIsChecked((prevState) => !prevState);
+        setCheckedTaskId(id);
     }
 
     return (

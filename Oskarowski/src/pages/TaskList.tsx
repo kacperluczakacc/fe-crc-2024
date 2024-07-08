@@ -12,7 +12,7 @@ export default function TaskList() {
     const [tasks, setState] = useState<TaskType[]>([]);
     const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
-    const [checkedTaskId, setCheckedTaskId] = useState("");
+    const [checkedTaskIds, setCheckedTaskIds] = useState<string[]>([]);
 
     async function getAllTasks() {
         setIsLoading(true);
@@ -29,12 +29,22 @@ export default function TaskList() {
         }
     }
 
-    async function deleteTask(id: string) {
-        await fetch(`${Endpoint.TASKS}/${id}`, {
-            method: "DELETE",
-        });
-        setCheckedTaskId("");
+    async function deleteTask(ids: string[]) {
+        const deletePromises = ids.map(id => 
+            fetch(`${Endpoint.TASKS}/${id}`, { method: "DELETE" })
+        );
+
+        await Promise.all(deletePromises);
+        setCheckedTaskIds([]);
         getAllTasks();
+    }
+
+    const handleTaskCheck = (id: string) => {
+        setCheckedTaskIds(prevState =>
+            prevState.includes(id) 
+                ? prevState.filter(taskId => taskId !== id) 
+                : [...prevState, id]
+        )
     }
 
     useEffect(() => {
@@ -52,10 +62,10 @@ export default function TaskList() {
                 </Link>
                 <div className="flex gap-4">
                     <FilterIcon size={24} />
-                    {checkedTaskId !== "" && (
+                    {checkedTaskIds.length > 0 && (
                         <TrashIcon
                             size={24}
-                            onClick={() => deleteTask(checkedTaskId)}
+                            onClick={() => deleteTask(checkedTaskIds)}
                         />
                     )}
                 </div>
@@ -73,7 +83,8 @@ export default function TaskList() {
                         author={task.author}
                         deadline={task.deadline}
                         id={task.id}
-                        setCheckedTaskId={setCheckedTaskId}
+                        isChecked={checkedTaskIds.includes(task.id)}
+                        setCheckedTaskId={handleTaskCheck}
                     />
                 ))
             )}

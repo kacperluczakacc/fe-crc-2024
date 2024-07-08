@@ -1,4 +1,4 @@
-# Tsimafei Lukashevich (e-mail: kulltima820@gmail.com, github: timosheyka)
+# React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 

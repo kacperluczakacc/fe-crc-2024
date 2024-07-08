@@ -1,44 +1,37 @@
-import { useState } from 'react'
-import Task from './components/Task'
-import TaskList from './components/TaskList'
-import AddTask from './components/AddTask'
+// Komponenty w React.js są funkcjami, które zwracają jeden element DOM
+// Składnia React.js jest JSX
+// Argumenty przekazywane do komponentów Reactowych nazywamy PROPS
+
+import { AddTask, TaskList } from "./pages";
+import { Route, Switch } from "react-router-dom";
+import { ROUTE } from "./lib/constants.ts";
+import { Header, Task } from "./components";
+import { Dayjs } from "dayjs";
 
 export type Task = {
-    title: string
-    author: string
-    deadline: string
+  title: string;
+  author: string;
+  deadline: Dayjs | null;
+  id: string;
 }
 
-const mockTasks: Task[] = [
-    {
-        title: 'Task 1',
-        author: 'Kacper',
-        deadline: '18/09/2025',
-    },
-    {
-        title: 'Task 2',
-        author: 'Tomek',
-        deadline: '18/09/2024',
-    },
-    {
-        title: 'Task 3',
-        author: 'Gosia',
-        deadline: '18/01/2025',
-    },
-]
+// Hooks to wbudowane funkcje/narzędzia, które pozwalają nam w prosty sposób manipulować
+// różnymi elementami/cyklami komponentów w React.js
 
 const App = () => {
-    const [tasks, setTasks] = useState(mockTasks)
-
-    return (
-        <main className='p-4'>
-            <section className='flex flex-col gap-8'>
-                <h1 className='text-4xl font-bold'>My tasks</h1>
-                <AddTask setTasks={setTasks} />
-                <TaskList tasks={tasks} />
-            </section>
-        </main>
-    )
+  return (
+   <>
+    <Header/>
+    <Switch>
+      <Route path={ROUTE.ADD_TASK}>
+        <AddTask />
+      </Route>
+      <Route path={ROUTE.HOME}>
+        <TaskList />
+      </Route>
+    </Switch>
+   </> 
+  )
 }
 
 export default App

@@ -3,10 +3,25 @@ import { TaskType } from "../App";
 
 import { MdOutlineCheckBoxOutlineBlank as EmptyCheckbox, MdOutlineCheckBox as CheckedCheckbox } from "react-icons/md";
 
-function Task({ title, author, deadline }: TaskType) {
+type TaskProps = {
+    title: string;
+    author: string;
+    deadline: string;
+    id: string;
+    setCheckedTaskId: React.Dispatch<React.SetStateAction<string>>; 
+}
+
+export default function Task({ 
+    title, 
+    author, 
+    deadline, 
+    id, 
+    setCheckedTaskId 
+}: TaskProps) {
     const [ isChecked, setIsChecked] = useState(false);
 
     function toggleCheck() {
+        setCheckedTaskId((prevValue) => prevValue === id ? '' : id);
         setIsChecked(prevState => !prevState)
     }
 
@@ -21,5 +36,3 @@ function Task({ title, author, deadline }: TaskType) {
         </div>
     )
 }
-
-export default Task
