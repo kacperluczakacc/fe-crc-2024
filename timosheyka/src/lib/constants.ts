@@ -18,3 +18,5 @@ export const AddTaskError = {
     AUTHOR: 'Author name should be at least 3 characters',
     DEADLINE: 'Deadline is null or does not meet DD/MM/YYYY format'
 }
+
+export enum CustomDate { TODAY, TOMORROW }
