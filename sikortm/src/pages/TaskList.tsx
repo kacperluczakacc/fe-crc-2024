@@ -8,7 +8,6 @@ import { Link } from "react-router-dom";
 import { Endpoint } from "../api/constants";
 import { useEffect, useState } from "react";
 import { Task as TaskType } from "../App";
-import dayjs from "dayjs";
 
 export default function TaskList() {
     // const tasks = useTypedSelector(state => state.tasks.taskList)
@@ -16,7 +15,22 @@ export default function TaskList() {
     const [tasks, setState] = useState<TaskType[]>([]);
     const [error, setError] = useState<string>('')
     const [isLoading, setIsLoading] = useState<boolean>(false);
-    const [checkedTaskId, setCheckedTaskId] = useState<string>('');
+    const [checkedTasksIds, setCheckedTasksIds] = useState<string[]>([]);
+    const [checkedTasksIdsSize, setCheckedTasksIdsSize] = useState<number>(0);
+    // Nie wiem z jakiego powodu ale musiałem zastosować kolejnego useState(),
+    // ponieważ zmiana checkedTasksIds nie odświeżała mi komponentu, a więc
+    // warunek, który sprawdzał wyświetlenie ikony kosza nie spełniał się
+    // nawet jeśli tablica nie była pusta, być może tablice nie wywołują
+    // odświeżenia komponentu i zawsze są tablicami.
+
+    const modifyCheckedTasks = (id: string) => {
+        if (!checkedTasksIds.includes(id))
+            checkedTasksIds.push(id);
+        else
+            checkedTasksIds.splice(checkedTasksIds.indexOf(id), 1);
+        setCheckedTasksIds(checkedTasksIds);
+        setCheckedTasksIdsSize(checkedTasksIds.length);
+    }
 
     const getAllTasks = async () => {
         setIsLoading(true);
@@ -30,11 +44,10 @@ export default function TaskList() {
         setIsLoading(false);
     }
 
-    const deleteTask = async (id: string) => {
-        await fetch(`${Endpoint.TASKS}/${id}`, {
-            method: 'DELETE'
-        });
-        setCheckedTaskId('');
+    const deleteTask = async (ids: string[]) => {
+        for (let i = 0; i < ids.length; i++)
+            await fetch(`${Endpoint.TASKS}/${ids[i]}`, { method: 'DELETE' });
+        setCheckedTasksIds([]);
         getAllTasks();
     }
     
@@ -51,7 +64,7 @@ export default function TaskList() {
                 </Link>
                 <div className='flex gap-4'>
                     <FilterIcon className="cursor-pointer" size={24} />
-                    {checkedTaskId != '' && <TrashIcon onClick={() => deleteTask(checkedTaskId)} className="cursor-pointer" size={24} />}
+                    {checkedTasksIdsSize > 0 && <TrashIcon onClick={() => deleteTask(checkedTasksIds)} className="cursor-pointer" size={24} />}
                 </div>
             </div>
             {isLoading ? <p>Loading...</p> : error.length > 0 ? <p>{error}</p> : tasks.map(task => 
@@ -59,9 +72,9 @@ export default function TaskList() {
                 key={task.title.replace(/ /g, '-')}
                 title={task.title}
                 author={task.author}
-                deadline={dayjs(task.deadline)}
+                deadline={task.deadline}
                 id={task.id}
-                setCheckedTaskId={setCheckedTaskId}
+                modifyCheckedTasks={modifyCheckedTasks}
             />)} 
         </section>
     )
