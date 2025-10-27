@@ -1,28 +1,34 @@
 import { MdClose } from 'react-icons/md'
-import React, { useState,useRef, useEffect } from 'react'
-import { Task } from '../App'
+import React, { useState } from 'react'
 import { RegExp } from '../../lib/constants'
 import { errorsContent } from '../../lib/constants'
 import { useHistory } from 'react-router-dom';
-import { addTask } from '../helpers/requests'
+import dayjs, { Dayjs } from 'dayjs'
+import { DatePicker } from '@mui/x-date-pickers'
+import { useDispatch } from 'react-redux'
+import { AppDispatch } from '../store'
+import { addNewTask } from '../reducers/taskReducer'
+import { FormField } from './addTaskFormField';
+import { useNotifyDispatch } from './notifyContext';
 
-
-type AddTaskFormProps = {
-    setTasks: React.Dispatch<React.SetStateAction<Task[]>>
+enum DateButtons {
+    Today = 'Today',
+    Tomorrow = 'Tomorrow'
 }
 
+export const AddTaskForm = () => {
 
-
-export const AddTaskForm = ({ setTasks }:AddTaskFormProps) => {
-    
     const history = useHistory();
-
+    const dispatch = useDispatch<AppDispatch>()
+    const notifyDispatch = useNotifyDispatch()
+    
     const [taskName, setTaskName] = useState<string | null>(null)
     const [taskAuthor, setTaskAuthor] = useState<string | null>(null)
-    const [taskDeadline, setTaskDeadline] = useState<string | null>(null)
+    const [taskDeadline, setTaskDeadline] = useState<Dayjs | null>(null)
     const [taskNameError, setTaskNameError] = useState<boolean>(false)
     const [taskAuthorError, setTaskAuthorError] = useState<boolean>(false)
     const [taskDeadlineError, setTaskDeadlineError] = useState<boolean>(false)
+    const [dateButton, setDateButton] = useState<DateButtons | null>(null)
 
     const handleAddTask = () => {
         if (!taskName || taskName.length < 3) {
@@ -31,27 +37,22 @@ export const AddTaskForm = ({ setTasks }:AddTaskFormProps) => {
         if (!taskAuthor || taskAuthor.length < 3) {
             setTaskAuthorError(true)
         }
-        if (!taskDeadline || taskDeadline.length === 0 || !RegExp.deadline.test(taskDeadline)) {
+        if (!taskDeadline || !RegExp.deadline.test(taskDeadline.format('DD/MM/YYYY'))) {
             console.log('Invalid deadline format')
             setTaskDeadlineError(true)
         }
 
-        if (taskName && taskAuthor && taskDeadline && taskName.length >= 3 && taskAuthor.length >= 3 && RegExp.deadline.test(taskDeadline) ){
-            // setTasks(prevTasks => [...prevTasks, {
-            //     title: taskName,
-            //     author: taskAuthor,
-            //     deadline: taskDeadline
-            // }])
-            addTask({
+        if (taskName && taskAuthor && taskDeadline && taskName.length >= 3 && taskAuthor.length >= 3 && RegExp.deadline.test(taskDeadline.format('DD/MM/YYYY'))) {
+
+            dispatch(addNewTask({
                 title: taskName,
                 author: taskAuthor,
-                deadline: taskDeadline
-            }).then(data => {
-                setTasks(prevTasks => [...prevTasks, data])
-            })
+                deadline: taskDeadline,
+                id: ''
+            }))
             // redirect
             history.push('/');
-
+            notifyDispatch({ type: 'SET', payload: 'Task added successfully' })
         } else {
             console.log('Task not added')
             return
@@ -72,19 +73,35 @@ export const AddTaskForm = ({ setTasks }:AddTaskFormProps) => {
         setTaskAuthor(input.currentTarget.value)
     }
 
-    const handleDeadlineInput = (input: React.FormEvent<HTMLInputElement>) => {
-        if (taskDeadlineError) {
-            setTaskDeadlineError(false)
+    // const handleDeadlineInput = (input: React.FormEvent<HTMLInputElement>) => {
+    //     if (taskDeadlineError) {
+    //         setTaskDeadlineError(false)
+    //     }
+    //     setTaskDeadline(dayjs(input.currentTarget.value))
+    // }
+
+    const handleToday = () => {
+        if (dateButton === DateButtons.Today) {
+            setDateButton(null)
+            setTaskDeadline(null)
+            return
+        } else {
+            setDateButton(DateButtons.Today)
+            setTaskDeadline(dayjs())
         }
-        setTaskDeadline(input.currentTarget.value)
     }
 
+    const handleTomorrow = () => {
+        if (dateButton === DateButtons.Tomorrow) {
+            setDateButton(null)
+            setTaskDeadline(null)
+            return
+        } else {
+            setDateButton(DateButtons.Tomorrow)
+            setTaskDeadline(dayjs().add(1, 'day'))
+        }
+    }
 
-    // useEffect(() => {
-    //     if (!RegExp.deadline.test(taskDeadline)) {
-    //         console.log('Invalid deadline format')
-    //     }
-    // }, [taskDeadline])
 
     return (
         <section className='px-4'>
@@ -95,50 +112,49 @@ export const AddTaskForm = ({ setTasks }:AddTaskFormProps) => {
             </div>
             <form className='flex flex-col justify-center gap-10 my-6'>
 
-                <div className='flex flex-col relative'>
-                <label className={`absolute -top-3 left-2 bg-secondary ` + (taskName!==null ? 'block' : 'hidden')} htmlFor='taskName'>Task name</label>
-                <input onInput={(input)=> handleTasknameInput(input)}
-                 className={`rounded-md border h-14 p-4 peer
-                  invalid:[&:not(:placeholder-shown)]:outline-error invalid:[&:not(:placeholder-shown)]:border-error` + (taskNameError ? ' border-error' : '')}
-                 type='text' placeholder={taskName === null ? 'Task name*' : ''}
-                 pattern='.{3,}'
-                 required
-                  />
-                    <span className='mt-2 absolute top-12 left-4 hidden text-sm font-semibold text-error peer-[&:invalid]:block'>
-                        <span className='text-slate-500 font-light'>{(taskName===null) ? '*required' : ''}</span>
-                        {( taskName && (taskName.length < 3 && taskName.length>0))? errorsContent.taskNameLength : (taskNameError && `Title ${errorsContent.requiredField}`)}
-                    </span>
-                </div>
-
-                <div className='flex flex-col relative'>
-                <label className={`absolute -top-3 left-2 bg-secondary ` + (taskAuthor!==null ? 'block' : 'hidden')} htmlFor='taskAuthor'>Author</label>
-                <input onInput={(input)=> handleAuthorInput(input)}
-                 type='text' placeholder={taskAuthor === null ? 'Author' : ''}
-                 className={`rounded-md border h-14 p-4 peer
-                  invalid:[&:not(:placeholder-shown)]:outline-error invalid:[&:not(:placeholder-shown)]:border-error ` + (taskAuthorError ? 'border-error' : '')}
-                 pattern='.{3,}'
-                 required
+                <FormField
+                    label='Task name'
+                    type='text'
+                    value={taskName}
+                    onChange={handleTasknameInput}
+                    error={taskNameError}
                 />
-                    <span className="mt-2 absolute top-12 left-4 hidden text-sm text-error peer-[&:invalid]:block">
-                        {(taskAuthor && (taskAuthor.length < 3 && taskAuthor.length>0)) ? errorsContent.taskAuthorLength : (taskAuthorError && `Author ${errorsContent.requiredField}`)}
-                    </span>
+                
+                <FormField
+                    label='Author'
+                    type='text'
+                    value={taskAuthor}
+                    onChange={handleAuthorInput}
+                    error={taskAuthorError}
+                />
+                
+                <p className='font-thin italic'>* Required fields</p>
+                <div className='flex gap-5'>
+                    <button type='button'
+                        className={`text-slate-900 border font-semibold rounded-md px-2 py-1 ` + (dateButton === DateButtons.Today ? 'bg-primary text-white' : '')}
+                        onClick={handleToday}
+                    >Today
+                    </button>
+                    <button type='button'
+                        className={`text-slate-900 border font-semibold rounded-md px-2 py-1 ` + (dateButton === DateButtons.Tomorrow ? 'bg-primary text-white' : '')}
+                        onClick={handleTomorrow}
+                    >Tomorrow
+                    </button>
                 </div>
-
-                <div className='flex flex-col relative'>
-                <label className='absolute -top-3 left-2 bg-secondary'  htmlFor='taskDeadline'>Deadline</label>
-                <input
-                 onInput={(input)=> handleDeadlineInput(input)}
-                 className={`rounded-md border h-14 p-4 peer
-                 invalid:[&:not(:placeholder-shown)]:outline-error invalid:[&:not(:placeholder-shown)]:border-error` + (taskDeadlineError ? ' border-error' : '')}
-                 type='text' placeholder={taskDeadline === null ? 'DD/MM/YYYY' : ''}
-                 pattern={RegExp.deadline.source}
-                 required
-                  />
-                    <span className="mt-2 absolute top-12 left-4 hidden text-sm text-error peer-[&:invalid]:block">
-                        {(taskDeadline) ? errorsContent.invalidDeadline : (taskDeadlineError && `Deadline ${errorsContent.requiredField}`) }
-                    </span>
+                <p className='text-slate-500'>Or select your date</p>
+                
+                <div>
+                    <DatePicker
+                        format='DD/MM/YYYY'
+                        value={taskDeadline}
+                        onChange={(date) => setTaskDeadline(date)}
+                    />
+                    <div className='text-error'>
+                        {taskDeadlineError && `Deadline ${errorsContent.requiredField}`}
+                    </div>
                 </div>
             </form>
         </section>
     )
 }
+

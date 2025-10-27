@@ -3,11 +3,23 @@ import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 import { BrowserRouter } from 'react-router-dom'
+import { LocalizationProvider } from '@mui/x-date-pickers'
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
+import { Provider } from 'react-redux'
+import { store } from './store'
+import { NotifyContextProvider } from './components/notifyContext.tsx'
+
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <BrowserRouter>
-      <App />
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <Provider store={store}>
+          <NotifyContextProvider>
+            <App />
+          </NotifyContextProvider>
+        </Provider>
+      </LocalizationProvider>
     </BrowserRouter>
   </React.StrictMode>,
 )

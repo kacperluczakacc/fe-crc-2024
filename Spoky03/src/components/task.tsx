@@ -2,21 +2,24 @@ import {
      MdCheckBoxOutlineBlank as EmptyCheckbox,
     MdOutlineCheckBox as CheckedCheckbox
  } from 'react-icons/md'
-import { useState } from 'react'
 import { Task as TaskType } from '../App'
+import dayjs from 'dayjs'
+import { AppDispatch, RootState } from '../store'
+import { useDispatch, useSelector } from 'react-redux'
+import { markTaskToDelete } from '../reducers/taskDeleteReducer'
 
-export const Task = ({title,author,deadline}: TaskType) => {
+export const Task = ({title,author,deadline, id}: TaskType) => {
     
-    const [isChecked, setIsChecked] = useState(false)
-    
+    const isChecked = useSelector((state:RootState) => state.tasksToDelete.includes(id))
+    const dispatch = useDispatch<AppDispatch>()
     const handleCheckbox = () => {
-        setIsChecked(prevState => !prevState)
+        dispatch(markTaskToDelete(id))
     }
-
+    
     return (
-        <div className='bg-secondary my-4 p-4 text-slate-900 flex justify-between items-center transition-colors duration-500 ease-in-out' >
+        <div className='bg-secondary p-4 border-b border-slate-500 text-slate-900 flex justify-between items-center transition-colors duration-500 ease-in-out' >
             <div>
-                <div>{deadline}</div>
+                <div>{dayjs(deadline).format('DD/MM/YYYY')}</div>
                 <div className='text-xl font-bold'>{title}</div>
                 <div className='text-slate-600'>{author}</div>
             </div>

@@ -1,58 +1,34 @@
 {
   "Tasks": [
     {
-      "title": "Task 1",
-      "author": "Alex",
-      "deadline": "10.05.2025",
-      "id": "a10b"
+      "id": "c7e6",
+      "title": "Task 2 ",
+      "author": "Author 2 ",
+      "deadline": "2024-06-03T13:40:20.219Z"
     },
     {
-      "title": "Task 2",
-      "author": "Asia",
-      "deadline": "10.05.2024",
-      "id": "21fa"
+      "id": "f7e0",
+      "title": "Task 1 ",
+      "author": "Author 1",
+      "deadline": "2024-06-02T13:40:35.130Z"
     },
     {
-      "title": "Task 3",
-      "author": "Adam",
-      "deadline": "01.05.2025",
-      "id": "9b1c"
+      "id": "2ac7",
+      "title": "Task 6",
+      "author": "Au 6",
+      "deadline": "2024-06-03T15:02:12.220Z"
     },
     {
-      "id": "7e35",
-      "title": "asd",
-      "author": "asd",
-      "deadline": "11/11/11"
+      "id": "a756",
+      "title": "Task 5",
+      "author": "Auth 5",
+      "deadline": "2024-06-02T15:02:26.448Z"
     },
     {
-      "id": "73fb",
-      "title": "chg",
-      "author": "asaa",
-      "deadline": "1/1/11"
-    },
-    {
-      "id": "e82b",
-      "title": "yyy",
-      "author": "yyy",
-      "deadline": "2/2/22"
-    },
-    {
-      "id": "8a36",
-      "title": "yyy",
-      "author": "yyy",
-      "deadline": "2/2/22"
-    },
-    {
-      "id": "207d",
-      "title": "uuu",
-      "author": "uuu",
-      "deadline": "2/2/22"
-    },
-    {
-      "id": "c495",
-      "title": "iii",
-      "author": "iii",
-      "deadline": "5/5/55"
+      "id": "50c5",
+      "title": "AAA",
+      "author": "ASSA",
+      "deadline": "2024-06-02T15:02:33.050Z"
     }
   ]
 }
