@@ -13,7 +13,7 @@ export default function TaskList() {
   const [tasks, setState] = useState<TaskType[]>([]);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [checkedTaskId, setCheckedTaskId] = useState("");
+  const [checkedTaskIds, setCheckedTaskId] = useState<string[]>([]);
 
   async function getAllTasks() {
     setIsLoading(true);
@@ -30,17 +30,27 @@ export default function TaskList() {
     }
   }
 
-  async function deleteTask(id: string) {
-    await fetch(`${Endpoint.TASKS}/${id}`, {
-      method: "DELETE",
-    });
-    setCheckedTaskId('');
+  async function deleteTasks() {
+    for (const id of checkedTaskIds) {
+      await fetch(`${Endpoint.TASKS}/${id}`, {
+        method: "DELETE",
+      });
+    }
+    setCheckedTaskId([]);
     getAllTasks();
   }
 
   useEffect(() => {
     getAllTasks();
   }, []);
+
+  function toggleTaskChecked(id: string) {
+    setCheckedTaskId((prevValue) =>
+      prevValue.includes(id)
+        ? prevValue.filter((taskId) => taskId !== id)
+        : [...prevValue, id]
+    );
+  }
 
   return (
     <section className="p-4">
@@ -53,8 +63,8 @@ export default function TaskList() {
         </Link>
         <div className="flex gap-4">
           <FilterIcon size={24} />
-          {checkedTaskId !== "" && (
-            <TrashIcon size={24} onClick={() => deleteTask(checkedTaskId)} />
+          {checkedTaskIds.length > 0 && (
+            <TrashIcon size={24} onClick={() => deleteTasks()} />
           )}
         </div>
       </div>
@@ -71,7 +81,8 @@ export default function TaskList() {
             author={task.author}
             deadline={task.deadline}
             id={task.id}
-            setCheckedTaskId={setCheckedTaskId}
+            toggleTaskChecked={toggleTaskChecked}
+            isChecked={checkedTaskIds.includes(task.id)}
           />
         ))
       )}

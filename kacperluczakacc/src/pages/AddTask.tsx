@@ -10,13 +10,12 @@ enum CustomDate {
   TODAY,
   TOMORROW,
 }
+
 export default function AddTask() {
   const history = useHistory();
 
   const [deadline, setDeadline] = useState<Dayjs | null>(null);
-  const [customButtonDate, setCustomButtonDate] = useState<CustomDate | null>(
-    null
-  );
+  const [customButtonDate, setCustomButtonDate] = useState<CustomDate | null>(null);
 
   const [taskName, setTaskName] = useState("");
   const [author, setAuthor] = useState("");
@@ -41,12 +40,9 @@ export default function AddTask() {
   }, [taskName, author]);
 
   useEffect(() => {
-    if (customButtonDate === null) {
-      setDeadline(null);
-    } else {
-      setDeadline(
-        customButtonDate === CustomDate.TODAY ? dayjs() : dayjs().add(1, "day")
-      );
+    if (customButtonDate !== null) {
+      const newDeadline = customButtonDate === CustomDate.TODAY ? dayjs() : dayjs().add(1, "day");
+      setDeadline(newDeadline);
       setDeadlineError(false);
     }
   }, [customButtonDate]);
@@ -77,7 +73,7 @@ export default function AddTask() {
   }
 
   function handleCustomButtonClick(date: CustomDate) {
-    setCustomButtonDate((prevValue) => (prevValue === date ? null : date));
+    setCustomButtonDate(date);
   }
 
   return (
@@ -123,10 +119,8 @@ export default function AddTask() {
             type="button"
             onClick={() => handleCustomButtonClick(CustomDate.TODAY)}
             className={`border rounded-lg px-4 py-1 border-slate-300 hover:bg-primary hover:text-white ${
-              customButtonDate === CustomDate.TODAY
-                ? "bg-primary text-white"
-                : ""
-            } `}
+              customButtonDate === CustomDate.TODAY ? "bg-primary text-white" : ""
+            }`}
           >
             Today
           </button>
@@ -134,9 +128,7 @@ export default function AddTask() {
             type="button"
             onClick={() => handleCustomButtonClick(CustomDate.TOMORROW)}
             className={`border rounded-lg px-4 py-1 border-slate-300 hover:bg-primary hover:text-white ${
-              customButtonDate === CustomDate.TOMORROW
-                ? "bg-primary text-white"
-                : ""
+              customButtonDate === CustomDate.TOMORROW ? "bg-primary text-white" : ""
             }`}
           >
             Tomorrow
@@ -148,18 +140,17 @@ export default function AddTask() {
         <div>
           <DatePicker
             className="w-full"
-            value={customButtonDate !== null ? null : deadline}
+            value={deadline}
             onChange={(date) => {
               setDeadline(date);
               setDeadlineError(false);
+              setCustomButtonDate(null);
             }}
-            onOpen={() => setCustomButtonDate(null)}
             format="DD/MM/YYYY"
           />
           {deadlineError && <p>{AddTaskError.DEADLINE}</p>}
         </div>
       </form>
     </section>
-    // TEMPLATE LITERAL
   );
 }

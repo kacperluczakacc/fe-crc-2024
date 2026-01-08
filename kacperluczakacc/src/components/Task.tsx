@@ -3,15 +3,13 @@ import {
   MdOutlineCheckBox as CheckedCheckbox,
 } from "react-icons/md";
 
-import { Task as TaskType } from "../App";
-import { useState } from "react";
-
 type TaskProps = {
   title: string;
   author: string;
   deadline: string;
   id: string;
-  setCheckedTaskId: React.Dispatch<React.SetStateAction<string>>;
+  toggleTaskChecked: (id: string) => void;
+  isChecked: boolean;
 };
 
 export default function Task({
@@ -19,18 +17,12 @@ export default function Task({
   author,
   deadline,
   id,
-  setCheckedTaskId,
+  toggleTaskChecked,
+  isChecked,
 }: TaskProps) {
-  const [isChecked, setIsChecked] = useState(false);
-
-  function toggleCheck() {
-    setCheckedTaskId((prevValue) => prevValue === id ? '' : id);
-    setIsChecked((prevState) => !prevState);
-  }
-
   return (
     <div
-      onClick={toggleCheck}
+      onClick={() => toggleTaskChecked(id)}
       className="bg-secondary rounded-2xl shadow-md active:bg-primary my-4 p-4 flex justify-between items-center"
     >
       <div>
