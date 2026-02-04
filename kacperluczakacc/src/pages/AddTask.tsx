@@ -5,6 +5,8 @@ import { DatePicker } from "@mui/x-date-pickers";
 import dayjs, { Dayjs } from "dayjs";
 import { Link, useHistory } from "react-router-dom";
 import { Endpoint } from "../api/constants";
+import InputText from "../components/InputText";
+import CustomButton from "../components/CustomButton";
 
 enum CustomDate {
   TODAY,
@@ -92,55 +94,24 @@ export default function AddTask() {
         </button>
       </div>
       <form className="flex flex-col gap-10 my-6 px-5">
-        <div className="flex flex-col relative">
-          <label className="absolute -top-3 left-2 bg-secondary px-2">
-            Task name
-          </label>
-          <input
-            onInput={(input) => setTaskName(input.currentTarget.value)}
-            className="border h-14 p-4"
-            type="text"
-          />
-          {taskNameError && (
-            <p className="text-red-500">{AddTaskError.TASK_NAME}</p>
-          )}
-        </div>
-
-        <div className="flex flex-col relative">
-          <label className="absolute -top-3 left-2 bg-secondary px-2">
-            Author
-          </label>
-          <input
-            className="border h-14 p-4"
-            type="text"
-            onInput={(input) => setAuthor(input.currentTarget.value)}
-          />
-          {authorError && <p className="text-red-500">{AddTaskError.AUTHOR}</p>}
-        </div>
+        <InputText label={'Task name'} value={taskName} onChange={setTaskName} error={taskNameError} errorMessage={AddTaskError.TASK_NAME} >
+        </InputText>
+        <InputText label={'Author'} value={author} onChange={setAuthor} error={authorError} errorMessage={AddTaskError.AUTHOR} >
+        </InputText>
 
         <div className="flex gap-4">
-          <button
-            type="button"
-            onClick={() => handleCustomButtonClick(CustomDate.TODAY)}
-            className={`border rounded-lg px-4 py-1 border-slate-300 hover:bg-primary hover:text-white ${
-              customButtonDate === CustomDate.TODAY
-                ? "bg-primary text-white"
-                : ""
-            } `}
-          >
-            Today
-          </button>
-          <button
-            type="button"
-            onClick={() => handleCustomButtonClick(CustomDate.TOMORROW)}
-            className={`border rounded-lg px-4 py-1 border-slate-300 hover:bg-primary hover:text-white ${
-              customButtonDate === CustomDate.TOMORROW
-                ? "bg-primary text-white"
-                : ""
-            }`}
-          >
-            Tomorrow
-          </button>
+        <CustomButton
+            label="Today"
+            dateType={CustomDate.TODAY}
+            customButtonDate={customButtonDate}
+            handleCustomButtonClick={handleCustomButtonClick}
+          />
+          <CustomButton
+            label="Tomorrow"
+            dateType={CustomDate.TOMORROW}
+            customButtonDate={customButtonDate}
+            handleCustomButtonClick={handleCustomButtonClick}
+          />
         </div>
 
         <p>or select your date</p>
@@ -160,6 +131,5 @@ export default function AddTask() {
         </div>
       </form>
     </section>
-    // TEMPLATE LITERAL
   );
 }
