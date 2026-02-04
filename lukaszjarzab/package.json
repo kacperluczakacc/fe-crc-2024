@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:withserver": "concurrently \"npm run dev\" \"npx json-server ../db.json\" ",
+    "dev:withserver": "concurrently \"npm run dev\" \"npx json-server ./db.json\" ",
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
