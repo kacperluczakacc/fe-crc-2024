@@ -10,7 +10,8 @@ type TaskProps = {
   author: string;
   deadline: string;
   id: string;
-  setCheckedTaskId: React.Dispatch<React.SetStateAction<string>>;
+  addCheckedTask: (id: string) => void;
+  dropCheckedTask: (id: string) => void;
 };
 
 export default function Task({
@@ -18,13 +19,15 @@ export default function Task({
   author,
   deadline,
   id,
-  setCheckedTaskId,
+  addCheckedTask,
+  dropCheckedTask,
 }: TaskProps) {
   const [isChecked, setIsChecked] = useState(false);
 
   function toggleCheck() {
-    setCheckedTaskId((prevValue) => prevValue === id ? '' : id);
     setIsChecked((prevState) => !prevState);
+    if (!isChecked) addCheckedTask(id)
+    if (isChecked) dropCheckedTask(id)
   }
 
   return (

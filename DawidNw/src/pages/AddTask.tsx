@@ -5,6 +5,7 @@ import { DatePicker } from "@mui/x-date-pickers";
 import dayjs, { Dayjs } from "dayjs";
 import { Link, useHistory } from "react-router-dom";
 import { Endpoint } from "../api/constants";
+import AddInput from "../components/AddInput";
 
 enum CustomDate {
   TODAY,
@@ -57,7 +58,7 @@ export default function AddTask() {
       body: JSON.stringify({
         title: taskName,
         author,
-        deadline: deadline?.toString()
+        deadline: deadline?.format("DD/MM/YYYY").toString()
       })
     });
 
@@ -70,7 +71,7 @@ export default function AddTask() {
 
       if (response.ok) {
         history.push(ROUTE.HOME);
-      } 
+      }
     } else {
       setErrors();
     }
@@ -92,52 +93,29 @@ export default function AddTask() {
         </button>
       </div>
       <form className="flex flex-col gap-10 my-6 px-5">
-        <div className="flex flex-col relative">
-          <label className="absolute -top-3 left-2 bg-secondary px-2">
-            Task name
-          </label>
-          <input
-            onInput={(input) => setTaskName(input.currentTarget.value)}
-            className="border h-14 p-4"
-            type="text"
-          />
-          {taskNameError && (
-            <p className="text-red-500">{AddTaskError.TASK_NAME}</p>
-          )}
-        </div>
 
-        <div className="flex flex-col relative">
-          <label className="absolute -top-3 left-2 bg-secondary px-2">
-            Author
-          </label>
-          <input
-            className="border h-14 p-4"
-            type="text"
-            onInput={(input) => setAuthor(input.currentTarget.value)}
-          />
-          {authorError && <p className="text-red-500">{AddTaskError.AUTHOR}</p>}
-        </div>
+        <AddInput labelName="Task name" setAttrValue={setTaskName} inputError={taskNameError} errorText={AddTaskError.TASK_NAME} />
+
+        <AddInput labelName="Author" setAttrValue={setAuthor} inputError={authorError} errorText={AddTaskError.AUTHOR} />
 
         <div className="flex gap-4">
           <button
             type="button"
             onClick={() => handleCustomButtonClick(CustomDate.TODAY)}
-            className={`border rounded-lg px-4 py-1 border-slate-300 hover:bg-primary hover:text-white ${
-              customButtonDate === CustomDate.TODAY
+            className={`border rounded-lg px-4 py-1 border-slate-300 hover:bg-primary hover:text-white ${customButtonDate === CustomDate.TODAY
                 ? "bg-primary text-white"
                 : ""
-            } `}
+              } `}
           >
             Today
           </button>
           <button
             type="button"
             onClick={() => handleCustomButtonClick(CustomDate.TOMORROW)}
-            className={`border rounded-lg px-4 py-1 border-slate-300 hover:bg-primary hover:text-white ${
-              customButtonDate === CustomDate.TOMORROW
+            className={`border rounded-lg px-4 py-1 border-slate-300 hover:bg-primary hover:text-white ${customButtonDate === CustomDate.TOMORROW
                 ? "bg-primary text-white"
                 : ""
-            }`}
+              }`}
           >
             Tomorrow
           </button>
